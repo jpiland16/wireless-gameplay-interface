@@ -14,8 +14,8 @@ class Action():
             self.adversary_guess = adversary_guess
 
     def __str__(self):
-        return f"(T: {self.transmission_band} | R: {self.receiver_guess} \
-            | A: {self.adversary_guess}"
+        return f"(T: {self.transmission_band} R: {self.receiver_guess} \
+A: {self.adversary_guess})"
 
 class Policy():
     """
@@ -119,6 +119,7 @@ class Game():
 
     Private variables: (not available to players)
      - policy_record
+     - communication_record
      - current_policy_id
     """
     def __init__(self, transmitter: Transmitter, receiver: Receiver,
@@ -130,6 +131,7 @@ class Game():
             self.adversary = adversary
             self.state = GameState(params, policy_list)
             self.policy_record = []
+            self.communication_record = []
 
     def advance_time(self) -> bool:
         """
@@ -169,7 +171,9 @@ class Game():
                 # Change the policy and communicate the change
                 self.state.score_a -= self.state.params.R3 * \
                     math.log2(self.state.params.N)
+                self.communication_record.append(True)
             else:
+                self.communication_record.append(False)
                 # Change the policy and don't communicate the change
                 if new_policy_id != self.current_policy_id:
                     self.state.score_a -= self.state.params.R2
@@ -183,3 +187,13 @@ class Game():
         self.state.t += 1
 
         return True
+
+    def __str__(self):
+        game_str = f"--GAME--\n"
+        for i in range(0, len(self.state.actions)):
+            game_str += f"Time {i}\t\
+Policy {self.policy_record[i]}\t\
+Action {self.state.actions[i]}\tPost-comm. \
+{self.communication_record[i]}\n"
+
+        return game_str
