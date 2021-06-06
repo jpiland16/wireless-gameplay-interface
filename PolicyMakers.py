@@ -7,6 +7,6 @@ class ExamplePolicyMaker(PolicyMaker):
 
     def get_policy_list(self):
         return [
-            Policy(lambda t: t % self.params.M),
-            Policy(lambda t: (t ** 2) % self.params.M)
+            Policy(lambda t: t % self.params.M, "t % M"),
+            Policy(lambda t: (t ** 2) % self.params.M, "t^2 % M")
         ]

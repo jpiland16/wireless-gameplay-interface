@@ -21,10 +21,16 @@ class Policy():
     """
     A wrapper used to store some function (`bandwidth_selector_function`)
     that takes time as an input and returns a value from 1 to M, 
-    where M is the number of available bands.
+    where M is the number of available bands. Also should contain a string
+    representing the policy if possible.
     """
-    def __init__(self, bandwidth_selector_function: 'function') -> None:
+    def __init__(self, bandwidth_selector_function: 'function', desc: str) \
+        -> None:
         self.get_bandwidth = bandwidth_selector_function
+        self.desc = desc
+
+    def __str__(self):
+        return self.desc
 
 
 class PolicyMaker():
@@ -169,6 +175,7 @@ class Game():
             self.current_policy_id = new_policy_id
             if communication:
                 # Change the policy and communicate the change
+                self.receiver.communicate(new_policy_id)
                 self.state.score_a -= self.state.params.R3 * \
                     math.log2(self.state.params.N)
                 self.communication_record.append(True)

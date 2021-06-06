@@ -7,3 +7,7 @@ class ParameterSet():
             self.R1 = R1
             self.R2 = R2
             self.R3 = R3
+
+    def __str__(self):
+        return f"(M: {self.M}, N: {self.N}, T: {self.T}, \
+R1: {self.R1}, R2: {self.R2}, R3: {self.R3})"

@@ -1,4 +1,5 @@
 from GameElements import Receiver, GameState
+from ShowInfo import show_info_with_extra
 
 class ExampleReceiver(Receiver):
 
@@ -14,3 +15,20 @@ class ExampleReceiver(Receiver):
     def __init__(self) -> None:
         super(ExampleReceiver, self).__init__(self.bandwidth_predictor_function, 
             self.communication_channel)
+
+
+class HumanReceiver(Receiver):
+
+    def bandwidth_predictor_function(self, game_state: GameState) -> int:
+        show_info_with_extra(game_state, self.communication + f"\n\n")
+        self.communication = "Policy not communicated."
+        return int(input("Predicted band? (0 - {:d}) > ".format(
+            game_state.params.M - 1)))
+
+    def communication_channel(self, policy) -> None:
+        self.communication = "Communicated policy: {:d}".format(policy)
+
+    def __init__(self) -> None:
+        super(HumanReceiver, self).__init__(self.bandwidth_predictor_function, 
+            self.communication_channel)
+        self.communication = "Policy not communicated."

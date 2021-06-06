@@ -43,7 +43,7 @@ def repeat_game(params: ParameterSet, policy_maker: PolicyMaker,
         timestamp = "{:%Y.%m.%d %H-%M-%S}".format(datetime.now())
         if not os.path.exists('output'):
             os.makedirs('output')
-        with open(f'output/Game {timestamp}.txt', 'w') as file:
+        with open(f'output/Games {timestamp}.txt', 'w') as file:
             file.write(output)
 
 
@@ -71,4 +71,7 @@ def main():
     demo()
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"\n\nKeyboardInterrupt")
