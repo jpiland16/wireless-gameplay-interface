@@ -75,9 +75,12 @@ def get_game_info_string(game_state: GameState) -> str:
     return output    
 
 def show_string(info: str) -> None:
-    info = info.replace(f"\n\n", "& echo. & echo ") \
-        .replace(f"\n", "& echo ").replace("^", "^^").replace("|", "^|")
-    os.system("start cmd /k \"echo " + info + " & echo. & pause & exit\"")
+    if os.name == 'nt':
+        info = info.replace(f"\n\n", "& echo. & echo ") \
+            .replace(f"\n", "& echo ").replace("^", "^^").replace("|", "^|")
+        os.system("start cmd /k \"echo " + info + " & echo. & pause & exit\"")
+    else:
+        print(info + "\n")
 
 def show_game_info(game_state: GameState) -> None:
     show_string(get_game_info_string(game_state))
