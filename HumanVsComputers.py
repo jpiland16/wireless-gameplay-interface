@@ -1,6 +1,6 @@
 from GameSimulator import *
 
-params = ParameterSet(
+params = GameParameterSet(
     M = 3,
     N = 2,
     T = 100,
@@ -31,7 +31,7 @@ def main():
 
         if role == 't':
             print("\nWelcome, transmitter.\n")
-            transmitter = HumanTransmitter()
+            transmitter = HumanTransmitter(num_policies=params.N)
         elif role == 'r':
             print("\nWelcome, receiver.\n")
             receiver = HumanReceiver()

@@ -1,5 +1,6 @@
 from GameElements import Receiver, GameState
 from ShowInfo import show_info_with_extra
+from Util import get_integer
 
 class ExampleReceiver(Receiver):
 
@@ -22,8 +23,8 @@ class HumanReceiver(Receiver):
     def bandwidth_predictor_function(self, game_state: GameState) -> int:
         show_info_with_extra(game_state, self.communication + f"\n\n")
         self.communication = "Policy not communicated."
-        return int(input("Predicted band? (0 - {:d}) > ".format(
-            game_state.params.M - 1)))
+        return get_integer("Predicted band? (0 - {:d})".format(
+            game_state.params.M - 1), min=0, max=game_state.params.M - 1)
 
     def communication_channel(self, policy) -> None:
         self.communication = "Communicated policy: {:d}".format(policy)

@@ -1,4 +1,4 @@
-from Parameters import ParameterSet
+from GameParameters import GameParameterSet
 import math
 
 class Action():
@@ -37,7 +37,7 @@ class PolicyMaker():
     """
     The agent who determines the policies before the game starts.
     """
-    def __init__(self, params: ParameterSet, 
+    def __init__(self, params: GameParameterSet, 
         policy_making_function: 'function') -> None:
             self.params = params
             self.get_policy_list = policy_making_function
@@ -101,7 +101,7 @@ class GameState():
     The publicly available information about the game. 
     (Everything except the players.)
     """
-    def __init__(self, params: ParameterSet, policy_list: 'list[Policy]'):
+    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]'):
         self.params = params
         self.t = 0
         self.score_a = 0
@@ -130,7 +130,7 @@ class Game():
     """
     def __init__(self, transmitter: Transmitter, receiver: Receiver,
         adversary: Adversary, policy_list: 'list[Policy]', 
-        params: ParameterSet):
+        params: GameParameterSet):
             self.current_policy_id = transmitter.start_policy
             self.transmitter = transmitter
             self.receiver = receiver
@@ -177,7 +177,7 @@ class Game():
                 # Change the policy and communicate the change
                 self.receiver.communicate(new_policy_id)
                 self.state.score_a -= self.state.params.R3 * \
-                    math.log2(self.state.params.N)
+                    math.log2(self.state.params.N) + self.state.params.R2
                 self.communication_record.append(True)
             else:
                 self.communication_record.append(False)
@@ -188,6 +188,11 @@ class Game():
                     # The transmitter didn't change the policy and 
                     # didn't communicate the policy number
                     pass
+        elif communication:
+            # Communicating the policy without switching it
+            # QUESTION - would this ever happen?
+            self.state.score_a -= self.state.params.R3 * \
+                math.log2(self.state.params.N)
 
         # Advance the time -----------------------------------------------------
 

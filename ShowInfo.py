@@ -64,13 +64,14 @@ def get_game_info_string(game_state: GameState) -> str:
         )
         output += line
 
-    
-    line = f"\n"
-    line += "t:{:6d}|".format(len(game_state.actions))
-    for policy in game_state.policy_list:
-        line += " {:2d}".format(policy.get_bandwidth(len(game_state.actions)))
+    if len(game_state.actions) < game_state.params.T:
+        line = f"\n"
+        line += "t:{:6d}|".format(len(game_state.actions))
+        for policy in game_state.policy_list:
+            line += " {:2d}".format(policy.get_bandwidth(len(game_state.actions)))
+        line += " |"
 
-    output += line + " |"
+    output += line
 
     return output    
 

@@ -6,7 +6,7 @@ from GameElements import *
 from datetime import datetime
 import os
 
-def simulate_game(params: ParameterSet, policy_maker: PolicyMaker,
+def simulate_game(params: GameParameterSet, policy_maker: PolicyMaker,
     transmitter: Transmitter, receiver: Receiver, adversary: Adversary) -> Game:
 
         policy_list = policy_maker.get_policy_list()
@@ -20,7 +20,7 @@ def simulate_game(params: ParameterSet, policy_maker: PolicyMaker,
 
         return game
 
-def repeat_game(params: ParameterSet, policy_maker: PolicyMaker,
+def repeat_game(params: GameParameterSet, policy_maker: PolicyMaker,
     transmitter: Transmitter, receiver: Receiver, adversary: Adversary, 
     count: int, save_output: bool = False) -> None:
 
@@ -33,7 +33,7 @@ def repeat_game(params: ParameterSet, policy_maker: PolicyMaker,
         score_b = result.state.score_b
         winner = 'A' if score_a > score_b else \
             'B' if score_b > score_a else '-'
-        print("Trial {:3d}  |  Score A: {:4d}  |  Score B: {:4d}  |  Winner: {:1s}"
+        print("Trial {:3d}  |  Score A: {:4d}  |  Score B: {:4d}"
             .format(i + 1, score_a, score_b, winner ))
 
         if save_output:
@@ -48,7 +48,7 @@ def repeat_game(params: ParameterSet, policy_maker: PolicyMaker,
 
 
 def demo():
-    params = ParameterSet(
+    params = GameParameterSet(
         M = 3,
         N = 2,
         T = 100,

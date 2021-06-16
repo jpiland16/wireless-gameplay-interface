@@ -1,4 +1,4 @@
-class ParameterSet():
+class GameParameterSet():
     def __init__(self, M: int, N: int, T: int, R1: float, 
         R2: float, R3: float):
             self.M = M
