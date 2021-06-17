@@ -113,6 +113,9 @@ def get_stats(**kwargs):
     b_avg_score = sum([game.state.score_b for game in completed_games]) / \
         len(completed_games)
     print(f"Avg. score A: {a_avg_score}, Avg. score B: {b_avg_score}")
+    print("A scores: ")
+    print([game.state.score_a for game in completed_games])
+    print("B scores:")
     print([game.state.score_b for game in completed_games])
 
 
