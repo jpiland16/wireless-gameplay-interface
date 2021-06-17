@@ -6,8 +6,7 @@ from tqdm import tqdm
 
 # Personal code
 from GameElements import Game, GameState
-from Util import one_hot_encode, one_hot_decode
-from neural_networks.base.ParameterHost import get_parameters
+from Util import one_hot_encode
 
 class SimpleRNN_Adversary(nn.Module):
     """
