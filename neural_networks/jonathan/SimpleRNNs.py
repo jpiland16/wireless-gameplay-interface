@@ -82,7 +82,7 @@ class SimpleRNN_Adversary(nn.Module):
         return adversary_guess
 
 
-    def train(self, completed_games: 'list[GameState]', params: dict) -> None:
+    def train(self, completed_games: 'list[Game]', params: dict) -> None:
 
         # Define Loss, Optimizer
         criterion = nn.CrossEntropyLoss()

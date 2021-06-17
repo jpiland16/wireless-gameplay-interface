@@ -21,13 +21,13 @@ default_params = {
     ],
     "TRAINING_SIMPLE_RNN_ADV": [
         Parameter("COUNT", "number of games to play", "int", 100),
-        Parameter("LEARNING_RATE", "learning rate", "float", 0.02),
-        Parameter('BATCH_SIZE', "mini-batch size for training", "int", 100),
-        Parameter('NUM_EPOCHS', "number of training epochs", "int", 1000),
-        Parameter('SEQ_LEN', "sequence length for training", "int", 10)
+        Parameter("LEARNING_RATE", "learning rate", "float", 0.03),
+        Parameter('BATCH_SIZE', "mini-batch size for training", "int", 20),
+        Parameter('NUM_EPOCHS', "number of training epochs", "int", 100),
+        Parameter('SEQ_LEN', "sequence length for training", "int", 25)
     ],
     "GAME_PARAMS": [
-        Parameter("M", "number of available bands", "int", 3),
+        Parameter("M", "number of available bands", "int", 10),
         Parameter("N", "number of available policies", "int", 2),
         Parameter("T", "length of the game", "int", 100),
         Parameter("R1", "Reward #1", "float", 10),

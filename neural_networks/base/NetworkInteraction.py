@@ -1,4 +1,4 @@
-import inspect
+import inspect, copy
 from tqdm import tqdm
 
 import Adversaries, Transmitters, Receivers, PolicyMakers
@@ -20,13 +20,12 @@ class ZipPlayer():
     and whether or not they have an associated neural network.
     """
     def __init__(self, agent: GameAgent, player=None):
-        self.name = agent.name
         self.player = player
-        self.nnet = agent.nnet
-        self.agent_ref = agent
+        self.agent = agent
 
     def __str__(self) -> str:
-        return self.name + (" (NEURAL NETWORK)" if self.nnet else "")
+        return self.agent.name + (" (NEURAL NETWORK)" 
+            if self.agent.nnet else "")
 
 #   -----------------------------------------------
 #   GETTER METHODS to retrieve all possible players
@@ -160,10 +159,23 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     print("Please wait while the neural networks are initialized...\n")
 
     # If adversary is using a NNET, we need to initialize it w/ parameters
-    if adversary.nnet != None:
-        adversary.nnet = adversary.nnet(game_params.N, game_params.M, device)
-        adversary.nnet = adversary.nnet.to(device)
-        adversary.player = lambda: Adversary(adversary.nnet.get_prediction)
+    if adversary.agent.nnet != None:
+        
+        # Copy the GameAgent to avoid overwriting weights and biases
+        adversary = copy.deepcopy(adversary)
+
+        if adversary.agent.nnet_instance == None:
+            adversary.agent.nnet_instance = adversary.agent.nnet(game_params.N, 
+                game_params.M, device)
+            adversary.agent.working_parameters = game_params
+        else:
+            if not game_params.are_equal_to(adversary.agent.working_parameters):
+                raise ValueError("Game parameters and model parameters " + 
+                    "are not compatible!")
+
+        adversary.agent.nnet_instance = adversary.agent.nnet_instance.to(device)
+        adversary.player = lambda: Adversary(
+            adversary.agent.nnet_instance.get_prediction)
         
     completed_games = []
 
@@ -179,10 +191,11 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
 
     if train_model:
         print("Training the network...")
-        for agent in [transmitter, receiver, policy_maker, adversary]:
-            if agent.nnet != None:
-                agent.nnet.train(completed_games, nnet_params)
-                add_trained_model(agent.agent_ref)
+        for zip_player in [transmitter, receiver, policy_maker, adversary]:
+            if zip_player.agent.nnet != None:
+                zip_player.agent.nnet_instance.train(completed_games,
+                    nnet_params)
+                add_trained_model(zip_player.agent)
 
         save_networks_to_disk()
         print("\nDone training!\n")

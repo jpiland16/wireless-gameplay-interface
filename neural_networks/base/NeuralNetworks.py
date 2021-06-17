@@ -45,6 +45,8 @@ class GameAgent():
         self.nnet = nnet
         self.role = role
         self.name = name
+        self.nnet_instance = None
+        self.working_parameters = None
 
 # ------------------------------------------------------------------------------
 # NEURAL NETWORK CLASSES -------------------------------------------------------
