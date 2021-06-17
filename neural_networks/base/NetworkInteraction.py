@@ -6,13 +6,14 @@ import Adversaries, Transmitters, Receivers, PolicyMakers
 from Util import confirm, get_integer, select_option
 from ShowInfo import get_game_info_string
 
-from GameElements import Adversary
+from GameElements import Transmitter, Receiver, Adversary, PolicyMaker
+from GameParameters import GameParameterSet
+from GameSimulator import simulate_game
+
 from neural_networks.base.NeuralNetworks import GameAgent, \
     get_available_networks, device, save_networks_to_disk, add_trained_model
 from neural_networks.base.ParameterHost import get_parameters
-from GameSimulator import simulate_game
 from neural_networks.jonathan.SimpleRNNs import SimpleRNN_Adversary
-from GameParameters import GameParameterSet
 
 class ZipPlayer():
     """
@@ -48,7 +49,9 @@ def get_transmitters() -> 'list[ZipPlayer]':
             if t[1].__module__ == "Transmitters"]
     for agent in get_available_networks():
         if agent.role == "Transmitter":
-            pass
+            transmitters.append(
+                ZipPlayer(agent)
+            )
     return transmitters
 
 def get_receivers() -> 'list[ZipPlayer]':
@@ -57,7 +60,9 @@ def get_receivers() -> 'list[ZipPlayer]':
             if r[1].__module__ == "Receivers"]
     for agent in get_available_networks():
         if agent.role == "Receiver":
-            pass
+            receivers.append(
+                ZipPlayer(agent)
+            )
     return receivers
 
 def get_policy_makers() -> 'list[ZipPlayer]':
@@ -66,7 +71,9 @@ def get_policy_makers() -> 'list[ZipPlayer]':
             if p[1].__module__ == "PolicyMakers"]
     for agent in get_available_networks():
         if agent.role == "PolicyMaker":
-            pass
+            policy_makers.append(
+                ZipPlayer(agent)
+            )
     return policy_makers
 
 #   --------------------------------
@@ -83,7 +90,8 @@ def train_demo():
         SimpleRNN_Adversary)
     
 
-    train_models(get_parameters("TRAINING_SIMPLE_RNN_ADV"), 
+    train_models(
+        get_parameters("TRAINING_SIMPLE_RNN_ADV"), 
         get_game_params_from_dict(get_parameters("GAME_PARAMS")),
         ZipPlayer(policy_maker_agent, 
             PolicyMakers.RandomDeterministicPolicyMaker), 
@@ -131,6 +139,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
             "Use default training parameters for neural network?"
         ))
 
+    print()
+
     if policy_maker == None:
         print("Select a policy maker.\n")
         policy_maker = select_option(get_policy_makers())
@@ -177,8 +187,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
                 zip_player = policy_maker
 
             if zip_player.agent.nnet_instance == None:
-                zip_player.agent.nnet_instance = zip_player.agent.nnet(game_params.N, 
-                    game_params.M, device)
+                zip_player.agent.nnet_instance = zip_player.agent.nnet(
+                    game_params, device)
                 zip_player.agent.working_parameters = game_params
             else:
                 if not game_params.are_equal_to(zip_player.agent.working_parameters):
@@ -189,10 +199,26 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
             
             zip_player.agent.nnet_instance = zip_player.agent.nnet_instance.to(device)
 
-            if zip_player.agent.role == "Adversary":
+            if zip_player.agent.role == "Transmitter":
+                # Initialize the transmitter's functions
+                transmitter.player = lambda num_policies: Transmitter(
+                    transmitter.agent.nnet_instance.select_policy,
+                    transmitter.agent.nnet_instance.get_start_policy()
+                )
+            elif zip_player.agent.role == "Receiver":
+                # Initialize the receiver's functions
+                receiver.player = lambda: Receiver(
+                    receiver.agent.nnet_instance.get_prediction,
+                    receiver.agent.nnet_instance.communicate_bandwidth
+                )
+            elif zip_player.agent.role == "Adversary":
                 # Initialize the adversary's prediction function
                 adversary.player = lambda: Adversary(
                     adversary.agent.nnet_instance.get_prediction)
+            elif zip_player.agent.role == "PolicyMaker":
+                policy_maker.player = lambda params: PolicyMaker(
+                    params, policy_maker.agent.nnet_instance.get_policy_list
+                )
         
     completed_games = []
 

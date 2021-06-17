@@ -2,7 +2,7 @@
 
 ## TL;DR
 
- - Create a subclass of `nn.Module` along the specifications of [`TemplateRNN.py`](https://github.com/jpiland16/neural-net-basic-game/blob/master/neural_networks/jonathan/TemplateRNN.py)
+ - Create a subclass of `nn.Module` along the specifications of [`TemplateRNNs.py`](https://github.com/jpiland16/neural-net-basic-game/blob/master/neural_networks/jonathan/TemplateRNNs.py)
 
  - Edit [`NeuralNetworks.py`](https://github.com/jpiland16/neural-net-basic-game/blob/master/neural_networks/base/NeuralNetworks.py) by importing your class at the top of the script, then adding a `GameAgent` containing the neural network to the `untrained_networks` list
 

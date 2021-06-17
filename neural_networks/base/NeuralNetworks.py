@@ -10,7 +10,8 @@ from Util import confirm
 
 # Neural network imports
 from neural_networks.jonathan.SimpleRNNs import SimpleRNN_Adversary
-from neural_networks.jonathan.TemplateRNN import TemplateRNN
+from neural_networks.jonathan.TemplateRNNs import TemplateRNN_Adversary, \
+    TemplateRNN_Receiver, TemplateRNN_Transmitter, TemplateRNN_PolicyMaker
 
 # Check to see if we can use the GPU
 device = torch.device('cpu')
@@ -59,8 +60,16 @@ Format: (nnet: nn.Module, role: str, name: str)
 '''
 
 untrained_networks = [
-    GameAgent("Adversary", "Jonathan's Example Adversary", SimpleRNN_Adversary),
-    GameAgent("Adversary", "Template NN Adversary", TemplateRNN)
+    # Templates
+    GameAgent("Transmitter", "Template NN Transmitter", TemplateRNN_Transmitter),
+    GameAgent("Receiver", "Template NN Receiver", TemplateRNN_Receiver),
+    GameAgent("Adversary", "Template NN Adversary", TemplateRNN_Adversary),
+    GameAgent("PolicyMaker", "Template NN Policy Maker", 
+        TemplateRNN_PolicyMaker),
+    
+    # Actually useful agents
+    GameAgent("Adversary", "Jonathan's Example RNN Adversary", 
+        SimpleRNN_Adversary)
 ]
 
 # ------------------------------------------------------------------------------

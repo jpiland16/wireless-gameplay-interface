@@ -1,3 +1,4 @@
+from GameParameters import GameParameterSet
 import random
 import torch
 import numpy as np
@@ -14,7 +15,7 @@ class SimpleRNN_Adversary(nn.Module):
     Based on the tutorial available at 
     https://blog.floydhub.com/a-beginners-guide-on-recurrent-neural-networks-with-pytorch/
     """
-    def __init__(self, N, M, device):
+    def __init__(self, params: GameParameterSet, device: torch.device):
         
         super(SimpleRNN_Adversary, self).__init__()
 
@@ -23,14 +24,14 @@ class SimpleRNN_Adversary(nn.Module):
         self.n_layers = 1
         self.to(device)
         self.my_device = device
-        self.M = M
+        self.M = params.M
 
         # Defining the layers ------------------------------
         # RNN Layer
-        self.rnn = nn.RNN((N + 3) * M, self.hidden_layer_size, 
+        self.rnn = nn.RNN((params.N + 3) * params.M, self.hidden_layer_size, 
             self.n_layers, batch_first=True)   
         # Fully connected layer
-        self.fc = nn.Linear(self.hidden_layer_size, M)
+        self.fc = nn.Linear(self.hidden_layer_size, params.M)
     
     def forward(self, input: torch.Tensor):
         """
