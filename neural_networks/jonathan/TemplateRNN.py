@@ -1,6 +1,7 @@
+from torch import nn
 from GameElements import GameState, Game
 
-class TemplateRNN():
+class TemplateRNN(nn.Module):
     """
     An empty framework that could potentially include a neural network.
     """
@@ -14,7 +15,11 @@ class TemplateRNN():
         You can save these parameters using `self` and/or use them
         to create a neural network.
         """
-        pass
+        
+        # Must have this line below in order to use neural network capabilities
+        # (Otherwise there will be an error in NetworkInteraction.py
+        # when we try to move to the specified device.)
+        super(TemplateRNN, self).__init__()
 
     def get_prediction(self, game_state: GameState):
         """

@@ -158,24 +158,41 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
 
     print("Please wait while the neural networks are initialized...\n")
 
-    # If adversary is using a NNET, we need to initialize it w/ parameters
-    if adversary.agent.nnet != None:
-        
-        # Copy the GameAgent to avoid overwriting weights and biases
-        adversary = copy.deepcopy(adversary)
+    for zip_player in [policy_maker, transmitter, receiver, adversary]:
+        # If player is using a NNET, we need to initialize it w/ parameters
+        if zip_player.agent.nnet != None:
 
-        if adversary.agent.nnet_instance == None:
-            adversary.agent.nnet_instance = adversary.agent.nnet(game_params.N, 
-                game_params.M, device)
-            adversary.agent.working_parameters = game_params
-        else:
-            if not game_params.are_equal_to(adversary.agent.working_parameters):
-                raise ValueError("Game parameters and model parameters " + 
-                    "are not compatible!")
+            # Create a deep copy to prevent overwrites
+            if zip_player.agent.role == "Transmitter":
+                transmitter = copy.deepcopy(transmitter)
+                zip_player = transmitter
+            elif zip_player.agent.role == "Receiver":
+                receiver = copy.deepcopy(receiver)
+                zip_player = receiver
+            elif zip_player.agent.role == "Adversary":
+                adversary = copy.deepcopy(adversary)
+                zip_player = adversary
+            elif zip_player.agent.role == "PolicyMaker":
+                policy_maker = copy.deepcopy(policy_maker)
+                zip_player = policy_maker
 
-        adversary.agent.nnet_instance = adversary.agent.nnet_instance.to(device)
-        adversary.player = lambda: Adversary(
-            adversary.agent.nnet_instance.get_prediction)
+            if zip_player.agent.nnet_instance == None:
+                zip_player.agent.nnet_instance = zip_player.agent.nnet(game_params.N, 
+                    game_params.M, device)
+                zip_player.agent.working_parameters = game_params
+            else:
+                if not game_params.are_equal_to(zip_player.agent.working_parameters):
+                    raise ValueError(f"Game parameters {str(game_params)} " + 
+                        "and model parameters " + 
+                       f"{str(zip_player.agent.working_parameters)}" + 
+                        " are not compatible!")
+            
+            zip_player.agent.nnet_instance = zip_player.agent.nnet_instance.to(device)
+
+            if zip_player.agent.role == "Adversary":
+                # Initialize the adversary's prediction function
+                adversary.player = lambda: Adversary(
+                    adversary.agent.nnet_instance.get_prediction)
         
     completed_games = []
 
