@@ -26,7 +26,7 @@ def get_game_info_string(game_state: GameState) -> str:
     for index, policy in enumerate(game_state.policy_list):
         output += f"Policy {index}: {policy}\n"
 
-    output += f"\nParamters: {game_state.params}\n\n"
+    output += f"\nParameters: {game_state.params}\n\n"
 
     output += " " * 9 + "Score A: {:d} // Score B: {:d}".format(
         int(game_state.score_a), int(game_state.score_b))

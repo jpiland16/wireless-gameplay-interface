@@ -43,7 +43,7 @@ def main():
             role_selected = False
 
     simulate_game(params, policy_maker, 
-        transmitter if transmitter else ExampleTransmitter(),
+        transmitter if transmitter else ExampleTransmitter(params.N),
         receiver if receiver else ExampleReceiver(),
         adversary if adversary else ExampleAdversary())
 
