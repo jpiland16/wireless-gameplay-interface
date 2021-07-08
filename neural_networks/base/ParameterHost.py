@@ -27,11 +27,11 @@ default_params = {
         Parameter('SEQ_LEN', "sequence length for training", "int", 25)
     ],
     "GAME_PARAMS": [
-        Parameter("M", "number of available bands", "int", 10),
-        Parameter("N", "number of available policies", "int", 2),
+        Parameter("M", "number of available bands", "int", 100),
+        Parameter("N", "number of available policies", "int", 40),
         Parameter("T", "length of the game", "int", 100),
         Parameter("R1", "Reward #1", "float", 1),
-        Parameter("R2", "Reward #2", "float", -0.001),
+        Parameter("R2", "Reward #2", "float", 2),
         Parameter("R3", "Reward #3", "float", 1)
     ]
 }

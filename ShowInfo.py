@@ -45,7 +45,7 @@ def get_game_info_string(game_state: GameState) -> str:
     output += " " * 8 + "| "
 
     for index, _ in enumerate(game_state.policy_list):
-        output += " {:1d} ".format(index)
+        output += "{:2d} ".format(index)
 
     output += f"|  T  R  A |\n"
 
