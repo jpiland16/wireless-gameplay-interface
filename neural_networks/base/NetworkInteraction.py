@@ -6,7 +6,7 @@ import Adversaries, Transmitters, Receivers, PolicyMakers
 from Util import confirm, get_integer, select_option
 from ShowInfo import get_game_info_string
 
-from GameElements import Transmitter, Receiver, Adversary, PolicyMaker
+from GameElements import Game, Transmitter, Receiver, Adversary, PolicyMaker
 from GameParameters import GameParameterSet
 from GameSimulator import simulate_game
 
@@ -122,14 +122,16 @@ def get_stats(**kwargs):
 def play_games(train_model: bool=False, print_each_game: bool=False, 
         nnet_params: dict=None, game_params: GameParameterSet=None, 
         policy_maker: ZipPlayer=None, transmitter: ZipPlayer=None, 
-        receiver: ZipPlayer=None, adversary: ZipPlayer=None):
+        receiver: ZipPlayer=None, adversary: ZipPlayer=None, count: int=-1,
+        show_output: bool=True) -> 'list[Game]':
 
     """
     This is the main function used to simulate multiple games
     between the various agents in the game.
     """
 
-    print("Playing games...")
+    if show_output:
+        print("Playing games...")
 
     if game_params == None:
         p = get_parameters("GAME_PARAMS", default=
@@ -142,7 +144,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
             "Use default training parameters for neural network?"
         ))
 
-    print()
+    if show_output:
+        print()
 
     if policy_maker == None:
         print("Select a policy maker.\n")
@@ -166,10 +169,11 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
    
     if train_model:
         count = nnet_params["COUNT"]
-    else:
+    elif count < 0:
         count = get_integer("How many games would you like to play?")
 
-    print("Please wait while the neural networks are initialized...\n")
+    if show_output:
+        print("Please wait while the neural networks are initialized...\n")
 
     for zip_player in [policy_maker, transmitter, receiver, adversary]:
         # If player is using a NNET, we need to initialize it w/ parameters
@@ -225,7 +229,10 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         
     completed_games = []
 
-    for _ in tqdm(range(count)):
+    iter = range(count)
+    if show_output:
+        iter = tqdm(iter)
+    for _ in iter:
         game = simulate_game(game_params, policy_maker.player(game_params), 
             transmitter.player(game_params.N), receiver.player(), 
             adversary.player())
@@ -233,7 +240,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         if print_each_game:
             print(get_game_info_string(game.state))
 
-    print(f"Completed {count} games.")
+    if show_output:
+        print(f"Completed {count} games.")
 
     if train_model:
         print("Training the network...")

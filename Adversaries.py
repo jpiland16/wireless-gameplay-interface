@@ -30,15 +30,20 @@ class HumanAdversary(Adversary):
 class GammaAdversary(Adversary):
 
     def get_policy_value(self, policy: Policy, actions: 'list[Action]'):
+
+        lo_lookback_index = max(0, len(actions) - self.max_lookback)
+        lookback_range = range(lo_lookback_index, len(actions))
+
         state_values = [self.gamma ** (len(actions) - t) 
-            for t in range(0, len(actions))]
+            for t in lookback_range]
 
         policy_predictions = [policy.get_bandwidth(t) 
-            for t in range(len(actions))]
+            for t in lookback_range]
         
         value = sum([state_values[t] 
-            if policy_predictions[t] == actions[t].transmission_band else 0 
-            for t in range(len(actions))])
+            if policy_predictions[t] == \
+                actions[t + lo_lookback_index].transmission_band else 0 
+            for t in range(len(lookback_range))])
 
         return value
 
@@ -52,4 +57,5 @@ class GammaAdversary(Adversary):
 
     def __init__(self) -> None:
         self.gamma = 0.3
+        self.max_lookback = 5
         super().__init__(self.bandwidth_prediction_function)
