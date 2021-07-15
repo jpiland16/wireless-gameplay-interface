@@ -137,7 +137,7 @@ class Game():
             self.adversary = adversary
             self.state = GameState(params, policy_list)
             self.policy_record = []
-            self.communication_record = []
+            self.communication_record = [True]
 
     def advance_time(self) -> bool:
         """
@@ -167,31 +167,36 @@ class Game():
             self.state.score_a += self.state.params.R1
 
         # After transmission, determine if a new policy is needed --------------
+        if self.state.t + 1 < self.state.params.T:
+            new_policy_id, communication = \
+                self.transmitter.get_policy(self.state)
 
-        new_policy_id, communication = self.transmitter.get_policy(self.state)
-
-        if new_policy_id != -1:
-            self.current_policy_id = new_policy_id
-            if communication:
-                # Change the policy and communicate the change
-                self.receiver.communicate(new_policy_id)
-                self.state.score_a -= self.state.params.R3 * \
-                    math.log2(self.state.params.N) + self.state.params.R2
-                self.communication_record.append(True)
-            else:
-                self.communication_record.append(False)
-                # Change the policy and don't communicate the change
-                if new_policy_id != self.current_policy_id:
-                    self.state.score_a -= self.state.params.R2
+            if new_policy_id != -1:
+                self.current_policy_id = new_policy_id
+                if communication:
+                    # Change the policy and communicate the change
+                    self.receiver.communicate(new_policy_id)
+                    self.state.score_a -= self.state.params.R3 * \
+                        math.log2(self.state.params.N) + self.state.params.R2
+                    self.communication_record.append(True)
                 else:
-                    # The transmitter didn't change the policy and 
-                    # didn't communicate the policy number
-                    pass
-        elif communication:
-            # Communicating the policy without switching it
-            # QUESTION - would this ever happen?
-            self.state.score_a -= self.state.params.R3 * \
-                math.log2(self.state.params.N)
+                    self.communication_record.append(False)
+                    # Change the policy and don't communicate the change
+                    if new_policy_id != self.current_policy_id:
+                        self.state.score_a -= self.state.params.R2
+                    else:
+                        # The transmitter didn't change the policy and 
+                        # didn't communicate the policy number
+                        pass
+            elif communication:
+                # Communicating the policy without switching it
+                # QUESTION - would this ever happen?
+                self.communication_record.append(True)
+                self.state.score_a -= self.state.params.R3 * \
+                    math.log2(self.state.params.N)
+            else:
+                # No policy change, and no communication
+                self.communication_record.append(False)
 
         # Advance the time -----------------------------------------------------
 
@@ -204,7 +209,7 @@ class Game():
         for i in range(0, len(self.state.rounds)):
             game_str += f"Time {i}\t\
 Policy {self.policy_record[i]}\t\
-Choice {self.state.rounds[i]}\tPost-comm. \
+Choice {self.state.rounds[i]}\tPre-comm. \
 {self.communication_record[i]}\n"
 
         return game_str

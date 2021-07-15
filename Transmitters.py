@@ -25,8 +25,8 @@ class HumanTransmitter(Transmitter):
 
     def __init__(self, num_policies: int) -> None:
         super(HumanTransmitter, self).__init__(self.policy_selector_function, 
-            start_policy = get_integer("Enter start policy", 
-                min=0, max=num_policies - 1))
+            start_policy = get_integer("\nEnter start policy " + 
+                f"(0-{num_policies - 1})", min=0, max=num_policies - 1))
     
 class RandomTransmitter(Transmitter):
 
