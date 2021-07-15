@@ -21,7 +21,7 @@ def get_game_info_string(game_state: GameState) -> str:
     T = 1,000,000.
     """
     output = f"** state of the game before the \
-{get_nth_str(len(game_state.actions) + 1)} turn **\n\n"
+{get_nth_str(len(game_state.rounds) + 1)} turn **\n\n"
 
     for index, policy in enumerate(game_state.policy_list):
         output += f"Policy {index}: {policy}\n"
@@ -52,23 +52,23 @@ def get_game_info_string(game_state: GameState) -> str:
     output += "-" * 8 + "|"
     output += "-" * (num_policies * 3 + 1) + "|" + "-" * 10 + f"|"
 
-    for index, action in enumerate(game_state.actions):
+    for index, round in enumerate(game_state.rounds):
         line = f"\n"
         line += "t:{:6d}|".format(index)
         for policy in game_state.policy_list:
             line += " {:2d}".format(policy.get_bandwidth(index))
         line += " | {:2d} {:2d} {:2d} |".format(
-            action.transmission_band,
-            action.receiver_guess,
-            action.adversary_guess
+            round.transmission_band,
+            round.receiver_guess,
+            round.adversary_guess
         )
         output += line
 
-    if len(game_state.actions) < game_state.params.T:
+    if len(game_state.rounds) < game_state.params.T:
         line = f"\n"
-        line += "t:{:6d}|".format(len(game_state.actions))
+        line += "t:{:6d}|".format(len(game_state.rounds))
         for policy in game_state.policy_list:
-            line += " {:2d}".format(policy.get_bandwidth(len(game_state.actions)))
+            line += " {:2d}".format(policy.get_bandwidth(len(game_state.rounds)))
         line += " |"
 
     output += line

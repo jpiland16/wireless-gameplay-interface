@@ -1,9 +1,9 @@
 from GameParameters import GameParameterSet
 import math
 
-class Action():
+class Round():
     """
-    A single action in the game, which contains a transmission
+    A single round in the game, which contains a transmission
     on a given band along with guesses of both the receiver
     and the adversary.
     """
@@ -107,7 +107,7 @@ class GameState():
         self.score_a = 0
         self.score_b = 0
         self.policy_list = policy_list
-        self.actions = []
+        self.rounds = []
 
 class Game():
     """
@@ -158,14 +158,13 @@ class Game():
         receiver_guess = self.receiver.predict_policy(self.state)
         adversary_guess = self.adversary.predict_policy(self.state)
 
-        self.state.actions.append(Action(transmission_band, receiver_guess, 
+        self.state.rounds.append(Round(transmission_band, receiver_guess, 
             adversary_guess))
-
-        if (receiver_guess == transmission_band):
-            if (adversary_guess != transmission_band):
-                self.state.score_a += self.state.params.R1
-            else:
-                self.state.score_b += self.state.params.R3
+        
+        if (adversary_guess == transmission_band):
+            self.state.score_b += self.state.params.R3
+        elif (receiver_guess == transmission_band):
+            self.state.score_a += self.state.params.R1
 
         # After transmission, determine if a new policy is needed --------------
 
@@ -202,10 +201,10 @@ class Game():
 
     def __str__(self):
         game_str = f"--GAME--\n"
-        for i in range(0, len(self.state.actions)):
+        for i in range(0, len(self.state.rounds)):
             game_str += f"Time {i}\t\
 Policy {self.policy_record[i]}\t\
-Action {self.state.actions[i]}\tPost-comm. \
+Choice {self.state.rounds[i]}\tPost-comm. \
 {self.communication_record[i]}\n"
 
         return game_str

@@ -113,11 +113,11 @@ class SimpleRNN_Adversary(nn.Module):
         """
         Takes the game state at time `t` and converts it to an input vector.
         """
-        action = game_state.actions[t]
+        round = game_state.rounds[t]
         input = np.array([
-            one_hot_encode(action.transmission_band, vector_size = self.M),
-            one_hot_encode(action.receiver_guess, vector_size = self.M),
-            one_hot_encode(action.adversary_guess, vector_size = self.M)] 
+            one_hot_encode(round.transmission_band, vector_size = self.M),
+            one_hot_encode(round.receiver_guess, vector_size = self.M),
+            one_hot_encode(round.adversary_guess, vector_size = self.M)] 
             + [ one_hot_encode(policy.get_bandwidth(t), self.M) 
                 for policy in game_state.policy_list ]
         )
@@ -161,7 +161,7 @@ class SimpleRNN_Adversary(nn.Module):
                 training_example_x.append(
                     self.get_input_vector_at_time(game.state, t))
                 training_example_y.append(
-                    game.state.actions[t + 1].transmission_band)
+                    game.state.rounds[t + 1].transmission_band)
 
             training_example_x.append(
                 self.get_half_empty_vector_at_time(game.state, 
@@ -169,7 +169,7 @@ class SimpleRNN_Adversary(nn.Module):
             )
 
             training_example_y.append(
-                game.state.actions[start_pos + seq_len].transmission_band)
+                game.state.rounds[start_pos + seq_len].transmission_band)
 
             train_x.append(training_example_x)
             train_y.append(training_example_y)

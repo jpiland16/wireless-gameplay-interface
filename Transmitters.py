@@ -89,10 +89,10 @@ class HumanInfoTransmitter(Transmitter):
         # Check the adversary's guess on the last turn, then update info ------
     
         self.adversary_band_guess_count[
-            game_state.actions[-1].adversary_guess] += 1
+            game_state.rounds[-1].adversary_guess] += 1
 
-        if game_state.actions[-1].adversary_guess == \
-                game_state.actions[-1].transmission_band:
+        if game_state.rounds[-1].adversary_guess == \
+                game_state.rounds[-1].transmission_band:
             # The adversary was correct
             self.adversary_policy_correct_count[self.policy_record[-1]] += 1
             self.adversary_correct_since_last_switch += 1

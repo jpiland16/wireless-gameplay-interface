@@ -1,5 +1,5 @@
 import numpy as np
-from GameElements import Action, Adversary, GameState, Policy
+from GameElements import Round, Adversary, GameState, Policy
 from ShowInfo import show_game_info
 from Util import get_integer
 import random
@@ -29,12 +29,12 @@ class HumanAdversary(Adversary):
 
 class GammaAdversary(Adversary):
 
-    def get_policy_value(self, policy: Policy, actions: 'list[Action]'):
+    def get_policy_value(self, policy: Policy, rounds: 'list[Round]'):
 
-        lo_lookback_index = max(0, len(actions) - self.max_lookback)
-        lookback_range = range(lo_lookback_index, len(actions))
+        lo_lookback_index = max(0, len(rounds) - self.max_lookback)
+        lookback_range = range(lo_lookback_index, len(rounds))
 
-        state_values = [self.gamma ** (len(actions) - t) 
+        state_values = [self.gamma ** (len(rounds) - t) 
             for t in lookback_range]
 
         policy_predictions = [policy.get_bandwidth(t) 
@@ -42,13 +42,13 @@ class GammaAdversary(Adversary):
         
         value = sum([state_values[t] 
             if policy_predictions[t] == \
-                actions[t + lo_lookback_index].transmission_band else 0 
+                rounds[t + lo_lookback_index].transmission_band else 0 
             for t in range(len(lookback_range))])
 
         return value
 
     def bandwidth_prediction_function(self, game_state: GameState) -> int:
-        policy_values = [self.get_policy_value(policy, game_state.actions) 
+        policy_values = [self.get_policy_value(policy, game_state.rounds) 
             for policy in game_state.policy_list] 
 
         policy_id = np.argmax(policy_values)
