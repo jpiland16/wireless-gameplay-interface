@@ -100,14 +100,18 @@ class GameState():
     """
     The publicly available information about the game. 
     (Everything except the players.)
+
+    EDIT: Modified to allow access to the policy history.
     """
-    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]'):
+    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]',
+            policy_choice_history: 'list[int]'):
         self.params = params
         self.t = 0
         self.score_a = 0
         self.score_b = 0
         self.policy_list = policy_list
         self.rounds = []
+        self.policy_choice_history = policy_choice_history
 
 class Game():
     """
@@ -124,7 +128,7 @@ class Game():
      - score_b
 
     Private variables: (not available to players)
-     - policy_record
+     - policy_record *** EDIT: now available to all players in GameState
      - communication_record
      - current_policy_id
     """
@@ -135,8 +139,8 @@ class Game():
             self.transmitter = transmitter
             self.receiver = receiver
             self.adversary = adversary
-            self.state = GameState(params, policy_list)
             self.policy_record = []
+            self.state = GameState(params, policy_list, self.policy_record)
             self.communication_record = [True]
 
     def advance_time(self) -> bool:
