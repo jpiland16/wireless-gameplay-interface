@@ -79,7 +79,7 @@ for i in range(LENGTH):
     #Adversary prediction
     output,ad_pol = adversary.predict(Ad_input)
     #Transmitter prediction
-    new_transmission_policy, _ = transmitter.get_policy()
+    new_transmission_policy, _ = transmitter.get_policy(game_state = None)
     trans_pol = new_transmission_policy if new_transmission_policy >= 0 \
         else last_transmitter_policy
     #Adversary loss/RL
