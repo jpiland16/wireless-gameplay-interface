@@ -8,7 +8,7 @@ def save(all_runs,all_ad_acc_pol,all_ad_acc_bw,all_trans_acc,all_acc,trans_pols,
     all_runs[3] = all_trans_choices
     all_ad_choices += [[ad_pols,ad_bws]]
     all_runs[4] = all_ad_choices
-    ppfilename = 'interface_runs.pk'
+    ppfilename = 'all_interface_runs.pk'
     with open(ppfilename, 'wb') as fi:
         pickle.dump(all_runs,fi)
 
@@ -21,6 +21,6 @@ def reset_saves():
     if user_input == "Y" or user_input == "y":
         all_runs = []
         all_runs += [[],[],[],[],[],[]]
-        ppfilename = 'interface_runs.pk'
+        ppfilename = 'all_interface_runs.pk'
         with open(ppfilename, 'wb') as fi:
             pickle.dump(all_runs,fi)

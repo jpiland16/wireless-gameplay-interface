@@ -58,91 +58,52 @@ def options_table(time,policies,future=5):
             next_row += "|"
         print(next_row)
 
-def game_progress(trans_choices,ad_choices,POLICIES_LIST,time,manual,all_acc_pol=0,all_acc_bw=0,past=5):
-    if manual:
-        if time-past+1 >= 0:
-            for i in range(time-past+1,time+1):
-                trans_pol = trans_choices[i]
-                ad_pol = ad_choices[i]
-                trans_bw = POLICIES_LIST[trans_pol-1][i]
-                ad_bw = POLICIES_LIST[ad_pol-1][i]
-                if i == time-past+1:
-                    progress_row(trans_pol,trans_bw,ad_pol,ad_bw,i,True)
-                else:
-                    progress_row(trans_pol,trans_bw,ad_pol,ad_bw,i,False)
-        else: 
-            for i in range(time+1):
-                trans_pol = trans_choices[i]
-                ad_pol = ad_choices[i]
-                trans_bw = POLICIES_LIST[trans_pol-1][i]
-                ad_bw = POLICIES_LIST[ad_pol-1][i]
-                if i == 0:
-                    progress_row(trans_pol,trans_bw,ad_pol,ad_bw,i,True)
-                else:
-                    progress_row(trans_pol,trans_bw,ad_pol,ad_bw,i,False)
-    else: 
-        trans_pol = trans_choices[time]
-        ad_pol = ad_choices[time]
-        trans_bw = POLICIES_LIST[trans_pol-1][time]
-        ad_bw = POLICIES_LIST[ad_pol-1][time]
-        acc_pol = all_acc_pol[time]
-        acc_bw = all_acc_bw[time]
-        if time == 0:
-            progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,True,True,acc_pol,acc_bw)
-        else:
-            progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,False,True,acc_pol,acc_bw)
-
-def progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,heading,accuracy=False,acc_pol=0,acc_bw=0):
-    if accuracy != True:
-        if heading == True:
-            print("time|Trans Pol|Trans BW|Ad Pol|Ad BW|")
-            print("-------------------------------------")
-        next_row = ""
-        time_heading = str(time)
-        next_row += add_spacing(4,time_heading,True)
-        next_row += "|"
-        add = str(trans_pol)
-        next_row += add_spacing(9,add,True)
-        next_row += "|"
-        add = str(trans_bw)
-        next_row += add_spacing(8,add,True)
-        next_row += "|"
-        add = str(ad_pol)
-        next_row += add_spacing(6,add,True)
-        next_row += "|"
-        add = str(ad_bw)
-        next_row += add_spacing(5,add,True)
-        next_row += "|"
-        print(next_row)
+def game_progress(trans_choices,ad_choices,POLICIES_LIST,time,all_ad_acc_pol=0,all_ad_acc_bw=0,all_trans_acc=0):
+    trans_pol = trans_choices[time]
+    ad_pol = ad_choices[time]
+    trans_bw = POLICIES_LIST[trans_pol-1][time]
+    ad_bw = POLICIES_LIST[ad_pol-1][time]
+    ad_acc_pol = all_ad_acc_pol[time]
+    ad_acc_bw = all_ad_acc_bw[time]
+    trans_acc = all_trans_acc[time]
+    if time == 0:
+        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,True,ad_acc_pol,ad_acc_bw,trans_acc)
     else:
-        if heading == True:
-            print("time|Trans Pol|Trans BW|Ad Pol|Ad BW|Pol Acc|BW Acc|")
-            print("----------------------------------------------------")
-        next_row = ""
-        time_heading = str(time)
-        next_row += add_spacing(4,time_heading,True)
-        next_row += "|"
-        add = str(trans_pol)
-        next_row += add_spacing(9,add,True)
-        next_row += "|"
-        add = str(trans_bw)
-        next_row += add_spacing(8,add,True)
-        next_row += "|"
-        add = str(ad_pol)
-        next_row += add_spacing(6,add,True)
-        next_row += "|"
-        add = str(ad_bw)
-        next_row += add_spacing(5,add,True)
-        next_row += "|"
-        add = str(acc_pol)
-        add += "%"
-        next_row += add_spacing(7,add,True)
-        next_row += "|"
-        add = str(acc_bw)
-        add += "%"
-        next_row += add_spacing(6,add,True)
-        next_row += "|"
-        print(next_row)
+        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,False,ad_acc_pol,ad_acc_bw,trans_acc)
+
+def progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,heading,ad_acc_pol=0,ad_acc_bw=0,trans_acc=0):
+    if heading == True:
+        print("time|Trans Pol|Trans BW|Ad Pol|Ad BW|Ad Pol Acc|Ad BW Acc|Trans Acc")
+        print("----------------------------------------------------")
+    next_row = ""
+    time_heading = str(time)
+    next_row += add_spacing(4,time_heading,True)
+    next_row += "|"
+    add = str(trans_pol)
+    next_row += add_spacing(9,add,True)
+    next_row += "|"
+    add = str(trans_bw)
+    next_row += add_spacing(8,add,True)
+    next_row += "|"
+    add = str(ad_pol)
+    next_row += add_spacing(6,add,True)
+    next_row += "|"
+    add = str(ad_bw)
+    next_row += add_spacing(5,add,True)
+    next_row += "|"
+    add = str(ad_acc_pol)
+    add += "%"
+    next_row += add_spacing(10,add,True)
+    next_row += "|"
+    add = str(ad_acc_bw)
+    add += "%"
+    next_row += add_spacing(9,add,True)
+    next_row += "|"
+    add = str(trans_acc)
+    add += "%"
+    next_row += add_spacing(9,add,True)
+    next_row += "|"
+    print(next_row)
 
 def graph_choices(trans_pols,ad_pols,trans_bws,ad_bws,gamelength,run_num):
     y1 = trans_pols
@@ -223,7 +184,10 @@ def print_runs(all_runs):
         file.write(script)
 
 
-ppfilename = 'mult_runs.pk'
-with open(ppfilename, 'rb') as fi:
-    all_runs = pickle.load(fi)
-print_runs(all_runs)
+ppfilename = 'all_interface_runs.pk'
+try:
+    with open(ppfilename, 'rb') as fi:
+        all_runs = pickle.load(fi)
+        print_runs(all_runs)
+except FileNotFoundError:
+    pass
