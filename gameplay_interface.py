@@ -42,6 +42,11 @@ NUM_POLICIES,NUM_BANDS,POLICIES_LIST,POLICIES,LENGTH = pol_initialize()
 all_pol_params += [[NUM_POLICIES,NUM_BANDS,POLICIES_LIST,POLICIES,LENGTH]]
 all_runs[0] = all_pol_params
 
+# ---- Jonathan
+next_input = [0] * (NUM_POLICIES * 2)
+past_inputs = []
+# ---- /Jonathan
+
 Ad_input = []
 #Ad_input = list/Tensor of next possible bandwidth for each policy
 input_states = []
@@ -81,8 +86,8 @@ for i in range(LENGTH):
     #Adversary prediction
     output,ad_pol = adversary.predict(Ad_input)
     #Transmitter prediction
-    new_transmission_policy, _ = transmitter.get_policy(game_state = None)
-    trans_pol = new_transmission_policy if new_transmission_policy >= 0 \
+    new_transmission_policy_index, _ = transmitter.get_policy(game_state = None)
+    trans_pol = new_transmission_policy_index if new_transmission_policy_index >= 0 \
         else last_transmitter_policy
     trans_pols += [trans_pol]
     #Adversary loss/RL
@@ -91,7 +96,21 @@ for i in range(LENGTH):
     # -- Trans_learn() --
     #accuracy + chart progress
     ad_correct_pol,ad_correct_bw,ad_acc_pol,ad_acc_bw = Ad_accuracy(trans_pol,ad_pol,ad_correct_pol,trans_bw,ad_bw,ad_correct_bw,time)
+
+    # ---- Jonathan added this
+    all_ad_acc_bw += [ad_acc_pol]
+    all_ad_acc_pol += [ad_acc_pol]
+    trans_bws += [trans_bw]
+    ad_bws += [ad_bw]
+    # ---- /end Jonathan
+
     trans_correct,trans_acc = Trans_accuracy(trans_bw,ad_bw,trans_correct,time)
+    
+    # ---- Jonathan
+    all_trans_acc += [trans_acc]
+    ad_pols = ad_choices
+    # ---- /end Jonathan
+
     game_progress(trans_pols,ad_choices,POLICIES_LIST,time,all_ad_acc_pol,all_ad_acc_bw,all_trans_acc)
     #set up for next timestep
     if i != LENGTH-1:

@@ -55,7 +55,8 @@ def Ad_learn(trans_pol,POLICIES,time,NUM_POLICIES,input_states,past_trans_vecs,L
 
     ad_choices += [ad_pol]
     ad_pol_index = ad_pol - 1
-    ad_bw = next_input[ad_pol_index*2]
+    # Jonathan made a change here to add the [0][-1]
+    ad_bw = next_input[0][-1][ad_pol_index*2]
     return(trans_bw,trans_vec,past_trans_vecs,ad_pol,ad_choices,ad_bw)
 
 def Ad_continue(time,NUM_POLICIES,input_states,trans_pol,next_input,past_inputs,LOOKBACK):
