@@ -175,7 +175,7 @@ def pol_initialize(prompts=True):
             elif user_input == 5:
                 policy = Policy(POLICY_NUM,NUM_BANDS,LENGTH,"mod with noise")
             elif user_input == 6:
-                statement = "How often would you like spiking to occur? (Must be smaller then gamelength)"
+                statement = "How often would you like spiking to occur? (Must be smaller than gamelength)"
                 valid_inputs = list(range(1,LENGTH+1))
                 print(statement)
                 user_input = int(input())

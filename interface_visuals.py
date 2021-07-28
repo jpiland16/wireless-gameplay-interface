@@ -58,7 +58,7 @@ def options_table(time,policies,future=5):
             next_row += "|"
         print(next_row)
 
-def game_progress(trans_choices,ad_choices,POLICIES_LIST,time,all_ad_acc_pol=0,all_ad_acc_bw=0,all_trans_acc=0):
+def game_progress(trans_choices,ad_choices,POLICIES_LIST,time,all_ad_acc_pol,all_ad_acc_bw,all_trans_acc,trans_score,ad_score):
     trans_pol = trans_choices[time]
     ad_pol = ad_choices[time]
     trans_bw = POLICIES_LIST[trans_pol-1][time]
@@ -67,14 +67,14 @@ def game_progress(trans_choices,ad_choices,POLICIES_LIST,time,all_ad_acc_pol=0,a
     ad_acc_bw = all_ad_acc_bw[time]
     trans_acc = all_trans_acc[time]
     if time == 0:
-        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,True,ad_acc_pol,ad_acc_bw,trans_acc)
+        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,True,ad_acc_pol,ad_acc_bw,trans_acc,trans_score,ad_score)
     else:
-        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,False,ad_acc_pol,ad_acc_bw,trans_acc)
+        progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,False,ad_acc_pol,ad_acc_bw,trans_acc,trans_score,ad_score)
 
-def progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,heading,ad_acc_pol=0,ad_acc_bw=0,trans_acc=0):
+def progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,heading,ad_acc_pol,ad_acc_bw,trans_acc,trans_score,ad_score):
     if heading == True:
-        print("time|Trans Pol|Trans BW|Ad Pol|Ad BW|Ad Pol Acc|Ad BW Acc|Trans Acc")
-        print("----------------------------------------------------")
+        print("time|Trans Pol|Trans BW|Ad Pol|Ad BW|Ad Pol Acc|Ad BW Acc|Trans Acc|Team A Score|Team B Score|")
+        print("----------------------------------------------------------------------------------------------")
     next_row = ""
     time_heading = str(time)
     next_row += add_spacing(4,time_heading,True)
@@ -102,6 +102,12 @@ def progress_row(trans_pol,trans_bw,ad_pol,ad_bw,time,heading,ad_acc_pol=0,ad_ac
     add = str(trans_acc)
     add += "%"
     next_row += add_spacing(9,add,True)
+    next_row += "|"
+    add = str(trans_score)
+    next_row += add_spacing(12,add,True)
+    next_row += "|"
+    add = str(ad_score)
+    next_row += add_spacing(12,add,True)
     next_row += "|"
     print(next_row)
 
@@ -136,11 +142,11 @@ def print_runs(all_runs):
         '''
 
     rep = ''
-    rep += 'Run #|Gamelength|# Pols|# BWs|# Layers|# Nodes|Learning Rate|Lookback|Pol Acc|BW Acc|'
+    rep += 'Run #|Gamelength|# Pols|# BWs|# Layers|# Nodes|Learning Rate|Lookback|Ad Pol Acc|Ad BW Acc|Trans Acc|Team A Score|Team B Score|'
     rep += add_spacing(40,"Notes",True,True)
     rep += "|Graph|"
     rep += "<br>"
-    rep += '------------------------------------------------------------------------------------------------------------------------------------'
+    rep += '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
     for i in range(len(all_runs[0])):
         rep += "<br>"
         add_next = str(i+1)
@@ -155,25 +161,34 @@ def print_runs(all_runs):
         add_next = str(all_runs[0][i][1])
         rep += add_spacing(5,add_next,True,True)
         rep += "|"
-        add_next = str(all_runs[1][i][0])
-        rep += add_spacing(8,add_next,True,True)
-        rep += "|"
-        add_next = str(all_runs[1][i][1])
-        rep += add_spacing(7,add_next,True,True)
-        rep += "|"
-        add_next = str(all_runs[1][i][2])
-        rep += add_spacing(13,add_next,True,True)
-        rep += "|"
-        add_next = str(all_runs[1][i][4])
-        rep += add_spacing(8,add_next,True,True)
-        rep += "|"
         add_next = str(all_runs[2][i][0])
-        rep += add_spacing(7,add_next,True,True)
+        rep += add_spacing(8,add_next,True,True)
         rep += "|"
         add_next = str(all_runs[2][i][1])
-        rep += add_spacing(6,add_next,True,True)
+        rep += add_spacing(7,add_next,True,True)
         rep += "|"
-        add_next = all_runs[5][i]
+        add_next = str(all_runs[2][i][2])
+        rep += add_spacing(13,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[2][i][4])
+        rep += add_spacing(8,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[3][i][0])
+        rep += add_spacing(10,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[3][i][1])
+        rep += add_spacing(9,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[3][i][2])
+        rep += add_spacing(9,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[6][i][0])
+        rep += add_spacing(12,add_next,True,True)
+        rep += "|"
+        add_next = str(all_runs[6][i][1])
+        rep += add_spacing(12,add_next,True,True)
+        rep += "|"
+        add_next = all_runs[7][i]
         rep += add_spacing(40,add_next,True,True)
         rep += "|"
         graph_name = "\"Graphs/Ad Graph Run " + str(i+1) + ".png\""
@@ -183,11 +198,11 @@ def print_runs(all_runs):
     with open("runs_summary.html", 'w') as file:
         file.write(script)
 
-
-ppfilename = 'all_interface_runs.pk'
-try:
-    with open(ppfilename, 'rb') as fi:
-        all_runs = pickle.load(fi)
-        print_runs(all_runs)
-except FileNotFoundError:
-    pass
+if __name__ == "__main__":
+    ppfilename = 'all_interface_runs.pk'
+    try:
+        with open(ppfilename, 'rb') as fi:
+            all_runs = pickle.load(fi)
+            print_runs(all_runs)
+    except FileNotFoundError:
+        pass

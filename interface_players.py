@@ -62,7 +62,7 @@ def initialize_Adversary(prompts,all_ad_params,all_runs,NUM_POLICIES,input_state
             pickle.dump(Rnn_params,fi)
     
     all_ad_params += [[NUM_LAYERS,HIDDEN_DIM,LEARNING_RATE,"RNN",LOOKBACK]]
-    all_runs[1] = all_ad_params
+    all_runs[2] = all_ad_params
     adversary = RNNAd(NUM_POLICIES, NUM_LAYERS, HIDDEN_DIM)    
     optimizer = optim.Adam(adversary.parameters(),lr=LEARNING_RATE)
 
