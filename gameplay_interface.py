@@ -78,6 +78,8 @@ all_runs[1] = all_ad_params
 
 transmitter = ExampleTransmitter(NUM_POLICIES)
 last_transmitter_policy = transmitter.start_policy
+game_state = GameState(
+    GameParameterSet(-1, NUM_POLICIES, -1, -1, -1, -1), [], [])
 
 LOOKBACK = all_ad_params[-1][4]
 ad_choices = []
@@ -86,9 +88,11 @@ for i in range(LENGTH):
     #Adversary prediction
     output,ad_pol = adversary.predict(Ad_input)
     #Transmitter prediction
-    new_transmission_policy_index, _ = transmitter.get_policy(game_state = None)
-    trans_pol = new_transmission_policy_index if new_transmission_policy_index >= 0 \
-        else last_transmitter_policy
+    new_transmission_policy_index, _ = transmitter.get_policy(game_state)
+    trans_pol = (new_transmission_policy_index if new_transmission_policy_index >= 0 \
+        else last_transmitter_policy)
+    last_transmitter_policy = trans_pol
+    trans_pol += 1
     trans_pols += [trans_pol]
     #Adversary loss/RL
     trans_bw,trans_vec,past_trans_vecs,ad_pol,ad_choices,ad_bw = Ad_learn(trans_pol,POLICIES,time,NUM_POLICIES,input_states,past_trans_vecs,LOOKBACK,output,optimizer,ad_choices,ad_pol,Ad_input)

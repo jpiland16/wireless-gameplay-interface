@@ -1,3 +1,4 @@
+from interface_visuals import print_runs
 import pickle
 from interface_valid_input import *
 
@@ -11,6 +12,8 @@ def save(all_runs,all_ad_acc_pol,all_ad_acc_bw,all_trans_acc,all_acc,trans_pols,
     ppfilename = 'all_interface_runs.pk'
     with open(ppfilename, 'wb') as fi:
         pickle.dump(all_runs,fi)
+
+    print_runs(all_runs)
 
 def reset_saves():
     statement = "Do you want to reset previous saves? (Y/N)"
