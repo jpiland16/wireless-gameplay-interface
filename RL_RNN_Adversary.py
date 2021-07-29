@@ -83,25 +83,29 @@ class PriyaRLAdversary(Adversary):
             # Remove the oldest element
             self.target_output_vectors.pop(0)
 
-    def __init__(self, num_policies: int) -> None:
-
-        NUM_LAYERS = 1
-        LEARN_RATE = 0.001
-        LOOKBACK = 20
-        HIDDEN_DIM = 16
-
+    def __init__(self, num_policies: int, net_params: dict) -> None:
+        """
+        Initialize this adversary and its neural network.
+        Note: net_params should be a dict containing the following keys:
+         - NUM_LAYERS
+         - LEARNING_RATE
+         - LOOKBACK
+         - HIDDEN_DIM
+         - REPETITIONS
+        """
         self.policy_choice_history = []
         self.past_input_vectors = []
         self.target_output_vectors = []
-        self.lookback = LOOKBACK
+        self.lookback = net_params["LOOKBACK"]
 
         class RL_RNN(nn.Module):
             def __init__(self, num_policies: int, num_layers: int, 
-                    hidden_dim: int, learning_rate: float):
+                    hidden_dim: int, learning_rate: float, repetitions: int):
                 """
                 Initialize this neural network.
                 """
                 super().__init__()
+
                 self.input_size = num_policies * 2
                 self.num_layers = num_layers
                 self.hidden_dim = hidden_dim
@@ -111,6 +115,7 @@ class PriyaRLAdversary(Adversary):
                 self.fc = nn.Linear(self.hidden_dim, self.output_size)
                 self.optimizer = torch.optim.Adam(self.parameters(), 
                     lr=learning_rate)
+                self.repetitions = repetitions
 
             def forward(self, input):
                 output, _ = self.rnn(input)
@@ -131,7 +136,7 @@ class PriyaRLAdversary(Adversary):
                 """
                 Called once at each timestep.
                 """
-                for _ in range(20):   
+                for _ in range(self.repetitions):   
                     output = self(Tensor([input])) 
                     self.zero_grad()
                     criterion = nn.MSELoss()
@@ -142,9 +147,10 @@ class PriyaRLAdversary(Adversary):
 
         self.net = RL_RNN(
             num_policies = num_policies,
-            num_layers = NUM_LAYERS,
-            hidden_dim = HIDDEN_DIM,
-            learning_rate = LEARN_RATE
+            num_layers = net_params["NUM_LAYERS"],
+            hidden_dim = net_params["HIDDEN_DIM"],
+            learning_rate = net_params["LEARNING_RATE"],
+            repetitions = net_params["REPETITIONS"]
         )            
 
         super().__init__(self.bandwidth_predictor_function)

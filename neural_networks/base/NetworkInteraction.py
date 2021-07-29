@@ -173,6 +173,14 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     elif count < 0:
         count = get_integer("How many games would you like to play?")
 
+    # Special work for PriyaRLAdversary
+    if adversary.agent.name == "PriyaRLAdversary":
+        adversary_init_function = adversary.player
+        adversary_params = get_parameters("RL_RNN", confirm(
+            "Do you want to use the default parameters for the RL-RNN?"))
+        adversary.player = lambda: adversary_init_function(game_params.N,
+            adversary_params)
+
     if show_output:
         print("Please wait while the neural networks are initialized...\n")
 
@@ -233,10 +241,6 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     iter = range(count)
     if show_output:
         iter = tqdm(iter)
-
-    if adversary.agent.name == "PriyaRLAdversary":
-        adversary_init_function = adversary.player
-        adversary.player = lambda: adversary_init_function(game_params.N)
 
     for _ in iter:
         game = simulate_game(game_params, policy_maker.player(game_params), 

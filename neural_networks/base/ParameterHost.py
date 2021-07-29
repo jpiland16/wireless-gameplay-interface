@@ -33,6 +33,16 @@ default_params = {
         Parameter("R1", "Reward #1", "float", 1),
         Parameter("R2", "Reward #2", "float", 2),
         Parameter("R3", "Reward #3", "float", 1)
+    ],
+    "RL_RNN": [
+        Parameter("NUM_LAYERS", "number of layers in RNN", "int", 1),
+        Parameter("LEARNING_RATE", "learning rate", "float", 0.001),
+        Parameter("LOOKBACK", "number of past timesteps to consider",
+            "int", 20),
+        Parameter("HIDDEN_DIM", "number of nodes in hidden dimension", 
+            "int", 16),
+        Parameter("REPETITIONS", "number of times to repeat training", 
+            "int", 20)
     ]
 }
 
