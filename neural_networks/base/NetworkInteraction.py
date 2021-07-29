@@ -35,7 +35,8 @@ class ZipPlayer():
 def get_adversaries() -> 'list[ZipPlayer]':
     adversaries = [ZipPlayer(GameAgent("Adversary", a[0]), a[1]) 
         for a in inspect.getmembers(Adversaries, inspect.isclass) 
-            if a[1].__module__ == "Adversaries"]
+            if a[1].__module__ == "Adversaries" 
+            or a[1].__module__ == "RL_RNN_Adversary"]
     for agent in get_available_networks():
         if agent.role == "Adversary":
             adversaries.append(
@@ -232,6 +233,11 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     iter = range(count)
     if show_output:
         iter = tqdm(iter)
+
+    if adversary.agent.name == "PriyaRLAdversary":
+        adversary_init_function = adversary.player
+        adversary.player = lambda: adversary_init_function(game_params.N)
+
     for _ in iter:
         game = simulate_game(game_params, policy_maker.player(game_params), 
             transmitter.player(game_params.N), receiver.player(), 

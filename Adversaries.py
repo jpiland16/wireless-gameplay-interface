@@ -4,6 +4,8 @@ from ShowInfo import show_game_info
 from Util import get_integer
 import random
 
+from RL_RNN_Adversary import PriyaRLAdversary
+
 class ExampleAdversary(Adversary):
 
     def bandwidth_predictor_function(self, game_state: GameState) -> int:
