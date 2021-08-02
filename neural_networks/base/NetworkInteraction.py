@@ -47,7 +47,8 @@ def get_adversaries() -> 'list[ZipPlayer]':
 def get_transmitters() -> 'list[ZipPlayer]':
     transmitters = [ZipPlayer(GameAgent("Transmitter", t[0]), t[1]) 
         for t in inspect.getmembers(Transmitters, inspect.isclass) 
-            if t[1].__module__ == "Transmitters"]
+            if t[1].__module__ == "Transmitters"
+            or t[1].__module__ == "IntelligentTransmitter"]
     for agent in get_available_networks():
         if agent.role == "Transmitter":
             transmitters.append(
@@ -243,8 +244,17 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         iter = tqdm(iter)
 
     for _ in iter:
-        game = simulate_game(game_params, policy_maker.player(game_params), 
-            transmitter.player(game_params.N), receiver.player(), 
+        policy_maker_player = policy_maker.player(game_params)
+
+        # Special work for IntelligentTransmitter
+        if transmitter.agent.name == "IntelligentTransmitter":
+            transmitter_player = transmitter.player(game_params,
+                policy_maker_player.get_policy_list())
+        else:
+            transmitter_player = transmitter.player(game_params.N)
+
+        game = simulate_game(game_params, policy_maker_player, 
+            transmitter_player, receiver.player(), 
             adversary.player())
         completed_games.append(game)
         if print_each_game:

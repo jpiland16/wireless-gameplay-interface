@@ -49,11 +49,27 @@ class GammaAdversary(Adversary):
 
         return value
 
-    def bandwidth_prediction_function(self, game_state: GameState) -> int:
+    def get_policy_max_mask(self, game_state: GameState) -> 'list[int]':
+        """
+        Return a 1 for policies that have the maximum value, and a 0 otherwise.
+        """
+
         policy_values = [self.get_policy_value(policy, game_state.rounds) 
             for policy in game_state.policy_list] 
 
-        policy_id = np.argmax(policy_values)
+        max_value = max(policy_values)
+        max_value_mask = [ 1 if v == max_value else 0 for v in policy_values ]
+
+        return max_value_mask
+
+    def bandwidth_prediction_function(self, game_state: GameState) -> int:
+        
+        indices = [ i for i in range(game_state.params.N) ]
+
+        # When two or more policies have the same value, 
+        # don't always choose the one with the lowest index
+        policy_id = random.choices(indices, weights=self.get_policy_max_mask(
+            game_state))[0]
 
         return game_state.policy_list[policy_id].get_bandwidth(game_state.t)
 

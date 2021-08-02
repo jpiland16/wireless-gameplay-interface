@@ -8,6 +8,16 @@ class PriyaRLAdversary(Adversary):
 
     def bandwidth_predictor_function(self, game_state: GameState) -> int:
 
+        if game_state.t > 0:
+
+            ### LEARN ###
+
+            self.refresh_neural_net_target(game_state)
+            self.net.train(self.next_training_input, self.target_output_vectors)
+            
+            # Pull in the most recent timestep for the next time we learn
+            self.refresh_neural_net_input(game_state)
+
         ### PREDICT ###
 
         # The 2 here signifies that we do not know if the policy
@@ -27,14 +37,8 @@ class PriyaRLAdversary(Adversary):
         # by GameElements)
         self.policy_choice_history.append(predicted_policy)
 
-        ### LEARN ###
-
-        self.refresh_neural_net_target(game_state)
-        self.net.train(self.past_input_vectors + [now_input], 
-            self.target_output_vectors)
-        
-        # Pull in the most recent timestep for the next time we learn
-        self.refresh_neural_net_input(game_state)
+        ### SETUP FOR LEARNING ###
+        self.next_training_input = self.past_input_vectors + [now_input]
 
         return predicted_bandwidth
 
@@ -42,12 +46,12 @@ class PriyaRLAdversary(Adversary):
 
         # Create the vector for one timestep
         vector = [0 for _ in range(2 * game_state.params.N)]
-        vector[ (game_state.policy_choice_history[-1] * 2) + 1 ] = 1
+        vector[ (game_state.policy_choice_history[-2] * 2) + 1 ] = 1
 
         for i in range(game_state.params.N):
             # TODO check on timing with game_state.t here
             vector[2 * i] = game_state.policy_list[i].get_bandwidth(
-                game_state.t)
+                game_state.t - 1)
 
         if self.past_input_vectors == None:
             self.past_input_vectors == [vector]
@@ -63,15 +67,15 @@ class PriyaRLAdversary(Adversary):
     def refresh_neural_net_target(self, game_state: GameState):
 
         target_output_vector = []
-        actual_policy_choice = game_state.policy_choice_history[-1]
+        actual_policy_choice = game_state.policy_choice_history[-2]
         actual_bandwidth = game_state.policy_list[actual_policy_choice]\
-            .get_bandwidth(game_state.t)
+            .get_bandwidth(game_state.t - 1)
 
         for k in range(game_state.params.N):
             if k == actual_policy_choice:
                 target_output_vector += [1.0]
             # TODO check on the timing here with game_state.t (- 1?)
-            elif game_state.policy_list[k].get_bandwidth(game_state.t) \
+            elif game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
                     == actual_bandwidth:
                 target_output_vector += [0.25]
             else:

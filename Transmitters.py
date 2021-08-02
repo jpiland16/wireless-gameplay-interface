@@ -3,6 +3,8 @@ from GameElements import Transmitter, GameState
 from ShowInfo import show_game_info, show_string
 from Util import get_integer, confirm
 
+from IntelligentTransmitter import IntelligentTransmitter
+
 class ExampleTransmitter(Transmitter):
 
     def policy_selector_function(self, game_state: GameState) -> int:

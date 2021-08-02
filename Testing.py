@@ -15,7 +15,7 @@ adversary_list = get_adversaries()
 
 # Choose the players
 policy_maker = policy_maker_list[1]
-transmitter = transmitter_list[2]
+transmitter = transmitter_list[3]
 receiver = receiver_list[0]
 adversary = adversary_list[1]
 
