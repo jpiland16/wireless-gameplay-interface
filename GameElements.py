@@ -103,15 +103,13 @@ class GameState():
 
     EDIT: Modified to allow access to the policy history.
     """
-    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]',
-            policy_choice_history: 'list[int]'):
+    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]'):
         self.params = params
         self.t = 0
         self.score_a = 0
         self.score_b = 0
         self.policy_list = policy_list
         self.rounds = []
-        self.policy_choice_history = policy_choice_history
 
 class Game():
     """
@@ -140,7 +138,7 @@ class Game():
             self.receiver = receiver
             self.adversary = adversary
             self.policy_record = []
-            self.state = GameState(params, policy_list, self.policy_record)
+            self.state = GameState(params, policy_list)
             self.communication_record = [True]
 
     def advance_time(self) -> bool:

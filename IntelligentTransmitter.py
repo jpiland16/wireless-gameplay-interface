@@ -86,9 +86,9 @@ class IntelligentTransmitter(Transmitter):
             policy_list: 'list[Policy]') -> None:
 
         self.internal_adversary = GammaAdversary()
-        self.max_lookahead = 2
+        self.max_lookahead = 1
         self.last_policy = self.get_best_policy_index(
-                GameState(game_params, policy_list, None))
+                GameState(game_params, policy_list))
 
         super().__init__(self.policy_selector_function, 
             start_policy = self.last_policy)

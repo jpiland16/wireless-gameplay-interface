@@ -46,7 +46,11 @@ class PriyaRLAdversary(Adversary):
 
         # Create the vector for one timestep
         vector = [0 for _ in range(2 * game_state.params.N)]
-        vector[ (game_state.policy_choice_history[-2] * 2) + 1 ] = 1
+        last_bandwidth = game_state.rounds[-1].transmission_band
+
+        for index, policy in enumerate(game_state.policy_list):
+            if policy.get_bandwidth(game_state.t - 1) == last_bandwidth:
+                vector[index] = 1
 
         for i in range(game_state.params.N):
             # TODO check on timing with game_state.t here
@@ -67,17 +71,13 @@ class PriyaRLAdversary(Adversary):
     def refresh_neural_net_target(self, game_state: GameState):
 
         target_output_vector = []
-        actual_policy_choice = game_state.policy_choice_history[-2]
-        actual_bandwidth = game_state.policy_list[actual_policy_choice]\
-            .get_bandwidth(game_state.t - 1)
+        actual_bandwidth = game_state.rounds[-1].transmission_band
 
         for k in range(game_state.params.N):
-            if k == actual_policy_choice:
-                target_output_vector += [1.0]
             # TODO check on the timing here with game_state.t (- 1?)
-            elif game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
+            if game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
                     == actual_bandwidth:
-                target_output_vector += [0.25]
+                target_output_vector += [1.0]
             else:
                 target_output_vector += [0.0]
 
