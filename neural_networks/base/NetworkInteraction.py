@@ -28,6 +28,9 @@ class ZipPlayer():
         return self.agent.name + (" (NEURAL NETWORK)" 
             if self.agent.nnet else "")
 
+    def __repr__(self):
+        return str(self)
+
 #   -----------------------------------------------
 #   GETTER METHODS to retrieve all possible players
 #   -----------------------------------------------

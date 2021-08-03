@@ -1,0 +1,30 @@
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+th, td {
+    width: 20px;
+    text-align: center;
+}
+
+.correctpol {
+    background-color: #00b000;
+}
+
+.correctband {
+    background-color: lightskyblue;
+}
+
+.guess {
+    background-color: lightgray;
+}
+
+.timecol {
+    color: gray;
+    padding: 0px 10px;
+}
+
+.wrong {
+    background-color: red;
+}
