@@ -4,6 +4,53 @@ from GameElements import Adversary, GameState
 import torch
 from torch import nn, Tensor
 
+class RL_RNN(nn.Module):
+            def __init__(self, num_policies: int, num_layers: int, 
+                    hidden_dim: int, learning_rate: float, repetitions: int):
+                """
+                Initialize this neural network.
+                """
+                super().__init__()
+
+                self.input_size = num_policies * 2
+                self.num_layers = num_layers
+                self.hidden_dim = hidden_dim
+                self.output_size = num_policies
+                self.rnn = nn.RNN(self.input_size, self.hidden_dim, 
+                    self.num_layers, batch_first=True)   
+                self.fc = nn.Linear(self.hidden_dim, self.output_size)
+                self.optimizer = torch.optim.Adam(self.parameters(), 
+                    lr=learning_rate)
+                self.repetitions = repetitions
+
+            def forward(self, input):
+                output, _ = self.rnn(input)
+                output = output.contiguous().view(-1, self.hidden_dim)   
+                output = self.fc(output)
+                sig = nn.Sigmoid()
+                output = sig(output)
+                return output
+
+            def predict(self, input): 
+                # Input is expected to be 2D
+                output = self(Tensor([input]))
+                last_layer = output[-1]
+                policy_choice = torch.argmax(last_layer).item()
+                return policy_choice
+
+            def train(self, input, target):
+                """
+                Called once at each timestep.
+                """
+                for _ in range(self.repetitions):   
+                    output = self(Tensor([input])) 
+                    self.zero_grad()
+                    criterion = nn.MSELoss()
+                    loss = criterion(output, 
+                        Tensor(target))
+                    loss.backward()
+                    self.optimizer.step()
+
 class PriyaRLAdversary(Adversary):
 
     def bandwidth_predictor_function(self, game_state: GameState) -> int:
@@ -101,53 +148,6 @@ class PriyaRLAdversary(Adversary):
         self.past_input_vectors = []
         self.target_output_vectors = []
         self.lookback = net_params["LOOKBACK"]
-
-        class RL_RNN(nn.Module):
-            def __init__(self, num_policies: int, num_layers: int, 
-                    hidden_dim: int, learning_rate: float, repetitions: int):
-                """
-                Initialize this neural network.
-                """
-                super().__init__()
-
-                self.input_size = num_policies * 2
-                self.num_layers = num_layers
-                self.hidden_dim = hidden_dim
-                self.output_size = num_policies
-                self.rnn = nn.RNN(self.input_size, self.hidden_dim, 
-                    self.num_layers, batch_first=True)   
-                self.fc = nn.Linear(self.hidden_dim, self.output_size)
-                self.optimizer = torch.optim.Adam(self.parameters(), 
-                    lr=learning_rate)
-                self.repetitions = repetitions
-
-            def forward(self, input):
-                output, _ = self.rnn(input)
-                output = output.contiguous().view(-1, self.hidden_dim)   
-                output = self.fc(output)
-                sig = nn.Sigmoid()
-                output = sig(output)
-                return output
-
-            def predict(self, input): 
-                # Input is expected to be 2D
-                output = self(Tensor([input]))
-                last_layer = output[-1]
-                policy_choice = torch.argmax(last_layer).item()
-                return policy_choice
-
-            def train(self, input, target):
-                """
-                Called once at each timestep.
-                """
-                for _ in range(self.repetitions):   
-                    output = self(Tensor([input])) 
-                    self.zero_grad()
-                    criterion = nn.MSELoss()
-                    loss = criterion(output, 
-                        Tensor(target))
-                    loss.backward()
-                    self.optimizer.step()
 
         self.net = RL_RNN(
             num_policies = num_policies,

@@ -1,5 +1,6 @@
 print("\nLoading...\n")
 
+from math import log2
 import pickle
 from copy import deepcopy
 
@@ -86,5 +87,62 @@ def play(policy_maker, transmitter, receiver, adversary, count, params):
         show_output=True
     )
 
+class SimResult:
+    def __init__(self, games, params):
+        self.games = games
+        self.params = params
+
+def main2(adversary, name):
+
+    # Number of repeats for each simulation
+    repeats = 2
+
+    policy_maker = policy_maker_list[1]
+    transmitter = transmitter_list[3]
+    receiver = receiver_list[0]
+
+    # Print info about what we are doing
+    print(f"Running {repeats} sims. ea. for P = {str(policy_maker)}, \n" + 
+        f"T = {str(transmitter)}, R = {str(receiver)}, A = {str(adversary)}\n")
+
+    default_params = get_parameters("GAME_PARAMS")
+
+    range_bands = range(10, 110, 10)
+    range_policies = range(10, 110, 10)
+    total_count = len(range_bands) * len(range_policies)
+
+    results = [ ]
+
+    count = 1
+
+    for num_bands in range_bands:
+
+        for num_policies in range_policies:
+
+            print(f"\nRun {count} of {total_count}...")
+
+            new_params = deepcopy(default_params)
+            new_params["M"] = num_bands
+            new_params["N"] = num_policies
+            new_params["R1"] = log2(num_policies) + 3
+
+            completed_games = play(
+                policy_maker=policy_maker,
+                transmitter=transmitter,
+                receiver=receiver,
+                adversary=adversary,
+                count=repeats,
+                params=new_params
+            )
+
+            result = SimResult(completed_games, new_params)
+
+            results.append(result)
+
+            count += 1
+
+    pickle.dump(results, open(name, 'wb'))
+
 if __name__ == "__main__":
-    main()
+    main2(adversary_list[1], "gamma.pkl")
+    main2(adversary_list[3], "rlrnn.pkl")

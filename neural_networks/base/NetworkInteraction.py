@@ -179,11 +179,11 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
 
     # Special work for PriyaRLAdversary
     if adversary.agent.name == "PriyaRLAdversary":
-        adversary_init_function = adversary.player
-        adversary_params = get_parameters("RL_RNN", confirm(
-            "Do you want to use the default parameters for the RL-RNN?"))
-        adversary.player = lambda: adversary_init_function(game_params.N,
+        adversary_params = get_parameters("RL_RNN")
+        adversary_player_init =  lambda: adversary.player(game_params.N,
             adversary_params)
+    else:
+        adversary_player_init = adversary.player
 
     if show_output:
         print("Please wait while the neural networks are initialized...\n")
@@ -258,7 +258,7 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
 
         game = simulate_game(game_params, policy_maker_player, 
             transmitter_player, receiver.player(), 
-            adversary.player())
+            adversary_player_init())
         completed_games.append(game)
         if print_each_game:
             print(get_game_info_string(game.state))

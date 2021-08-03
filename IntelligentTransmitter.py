@@ -43,9 +43,12 @@ class IntelligentTransmitter(Transmitter):
                     game_state.params.R3 * log2(game_state.params.N))
             )
 
-            if time_future < self.max_lookahead:
+            if (time_future < self.max_lookahead 
+                and game_state.t + time_future < game_state.params.T):
+                
+                next_game_state = deepcopy(game_state)
 
-                game_state.rounds.append(
+                next_game_state.rounds.append(
                     Round(game_state.policy_list[policy_choice].get_bandwidth(
                         game_state.t), None, None)
                 )
