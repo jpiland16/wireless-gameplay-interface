@@ -128,7 +128,7 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         nnet_params: dict=None, game_params: GameParameterSet=None, 
         policy_maker: ZipPlayer=None, transmitter: ZipPlayer=None, 
         receiver: ZipPlayer=None, adversary: ZipPlayer=None, count: int=-1,
-        show_output: bool=True, pm_sim_score: float = None) -> 'list[Game]':
+        show_output: bool=True, pm_sim_score: float = 0.5) -> 'list[Game]':
 
     """
     This is the main function used to simulate multiple games
