@@ -78,6 +78,7 @@ class IntelligentTransmitter(Transmitter):
         
         new_policy = self.get_best_policy_index(game_state, 0, self.last_policy)
         policy_changed = (new_policy != self.last_policy)
+        self.last_policy = new_policy
 
         # Note, we are always communicating if the policy changes
         return new_policy, policy_changed
