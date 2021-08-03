@@ -128,7 +128,7 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         nnet_params: dict=None, game_params: GameParameterSet=None, 
         policy_maker: ZipPlayer=None, transmitter: ZipPlayer=None, 
         receiver: ZipPlayer=None, adversary: ZipPlayer=None, count: int=-1,
-        show_output: bool=True) -> 'list[Game]':
+        show_output: bool=True, pm_sim_score: float = None) -> 'list[Game]':
 
     """
     This is the main function used to simulate multiple games
@@ -247,7 +247,11 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         iter = tqdm(iter)
 
     for _ in iter:
-        policy_maker_player = policy_maker.player(game_params)
+
+        if policy_maker.agent.name == "SimilarPolicyMaker":
+            policy_maker_player = policy_maker.player(game_params, pm_sim_score)
+        else:
+            policy_maker_player = policy_maker.player(game_params)
 
         # Special work for IntelligentTransmitter
         if transmitter.agent.name == "IntelligentTransmitter":
