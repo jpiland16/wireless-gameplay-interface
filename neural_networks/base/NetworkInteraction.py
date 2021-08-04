@@ -178,7 +178,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         count = get_integer("How many games would you like to play?")
 
     # Special work for PriyaRLAdversary
-    if adversary.agent.name == "PriyaRLAdversary":
+    if (adversary.agent.name == "PriyaRL_NoPolicy" or 
+            adversary.agent.name == "PriyaRL_WithPolicy"):
         adversary_params = get_parameters("RL_RNN")
         adversary_player_init =  lambda: adversary.player(game_params.N,
             adversary_params)

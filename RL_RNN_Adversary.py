@@ -93,11 +93,15 @@ class PriyaRLAdversary(Adversary):
 
         # Create the vector for one timestep
         vector = [0 for _ in range(2 * game_state.params.N)]
-        last_bandwidth = game_state.rounds[-1].transmission_band
 
-        for index, policy in enumerate(game_state.policy_list):
-            if policy.get_bandwidth(game_state.t - 1) == last_bandwidth:
-                vector[index] = 1
+        if self.has_policy_knowledge:
+            vector[ (game_state.policy_choice_history[-2] * 2) + 1 ] = 1
+        else:
+            last_bandwidth = game_state.rounds[-1].transmission_band
+
+            for index, policy in enumerate(game_state.policy_list):
+                if policy.get_bandwidth(game_state.t - 1) == last_bandwidth:
+                    vector[index] = 1
 
         for i in range(game_state.params.N):
             # TODO check on timing with game_state.t here
@@ -118,15 +122,31 @@ class PriyaRLAdversary(Adversary):
     def refresh_neural_net_target(self, game_state: GameState):
 
         target_output_vector = []
-        actual_bandwidth = game_state.rounds[-1].transmission_band
 
-        for k in range(game_state.params.N):
-            # TODO check on the timing here with game_state.t (- 1?)
-            if game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
-                    == actual_bandwidth:
-                target_output_vector += [1.0]
-            else:
-                target_output_vector += [0.0]
+        if self.has_policy_knowledge:
+            actual_policy_choice = game_state.policy_choice_history[-2]
+            actual_bandwidth = game_state.policy_list[actual_policy_choice]\
+                .get_bandwidth(game_state.t - 1)
+
+            for k in range(game_state.params.N):
+                if k == actual_policy_choice:
+                    target_output_vector += [1.0]
+                # TODO check on the timing here with game_state.t (- 1?)
+                elif game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
+                        == actual_bandwidth:
+                    target_output_vector += [0.25]
+                else:
+                    target_output_vector += [0.0]
+        else:
+            actual_bandwidth = game_state.rounds[-1].transmission_band
+
+            for k in range(game_state.params.N):
+                # TODO check on the timing here with game_state.t (- 1?)
+                if game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
+                        == actual_bandwidth:
+                    target_output_vector += [1.0]
+                else:
+                    target_output_vector += [0.0]
 
         self.target_output_vectors.append(target_output_vector)
 
@@ -134,7 +154,8 @@ class PriyaRLAdversary(Adversary):
             # Remove the oldest element
             self.target_output_vectors.pop(0)
 
-    def __init__(self, num_policies: int, net_params: dict) -> None:
+    def __init__(self, num_policies: int, net_params: dict, 
+        has_policy_knowledge: bool = False) -> None:
         """
         Initialize this adversary and its neural network.
         Note: net_params should be a dict containing the following keys:
@@ -148,6 +169,7 @@ class PriyaRLAdversary(Adversary):
         self.past_input_vectors = []
         self.target_output_vectors = []
         self.lookback = net_params["LOOKBACK"]
+        self.has_policy_knowledge = has_policy_knowledge
 
         self.net = RL_RNN(
             num_policies = num_policies,
@@ -158,3 +180,12 @@ class PriyaRLAdversary(Adversary):
         )            
 
         super().__init__(self.bandwidth_predictor_function)
+
+
+class PriyaRL_NoPolicy(PriyaRLAdversary):
+    def __init__(self, num_policies: int, net_params: dict) -> None:
+        super().__init__(num_policies, net_params, False)
+
+class PriyaRL_WithPolicy(PriyaRLAdversary):
+    def __init__(self, num_policies: int, net_params: dict) -> None:
+        super().__init__(num_policies, net_params, True)

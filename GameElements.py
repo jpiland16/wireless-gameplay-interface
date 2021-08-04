@@ -103,12 +103,14 @@ class GameState():
 
     EDIT: Modified to allow access to the policy history.
     """
-    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]'):
+    def __init__(self, params: GameParameterSet, policy_list: 'list[Policy]',
+            policy_choice_history: list = None):
         self.params = params
         self.t = 0
         self.score_a = 0
         self.score_b = 0
         self.policy_list = policy_list
+        self.policy_choice_history = policy_choice_history
         self.rounds = []
 
     def __deepcopy__(self, memo):
@@ -119,6 +121,8 @@ class GameState():
         new.rounds = self.rounds[:]
         new.score_a = self.score_a
         new.score_b = self.score_b
+        if self.policy_choice_history != None:
+            new.policy_choice_history = self.policy_choice_history[:]
 
         return new
 
@@ -150,7 +154,7 @@ class Game():
             self.receiver = receiver
             self.adversary = adversary
             self.policy_record = []
-            self.state = GameState(params, policy_list)
+            self.state = GameState(params, policy_list, self.policy_record)
             self.communication_record = [True]
 
     def advance_time(self) -> bool:

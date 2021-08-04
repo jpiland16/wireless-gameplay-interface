@@ -4,7 +4,7 @@ from ShowInfo import show_game_info
 from Util import get_integer
 import random
 
-from RL_RNN_Adversary import PriyaRLAdversary
+from RL_RNN_Adversary import PriyaRL_NoPolicy, PriyaRL_WithPolicy
 
 class ExampleAdversary(Adversary):
 

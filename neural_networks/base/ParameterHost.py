@@ -30,9 +30,9 @@ default_params = {
         Parameter("M", "number of available bands", "int", 10),
         Parameter("N", "number of available policies", "int", 16),
         Parameter("T", "length of the game", "int", 200),
-        Parameter("R1", "Reward #1", "float", 10), 
-        Parameter("R2", "Reward #2", "float", 4),  
-        Parameter("R3", "Reward #3", "float", 1)   
+        Parameter("R1", "Reward #1", "float", 10), # Reward for not getting blocked
+        Parameter("R2", "Reward #2", "float", 4),  # Cost to switch (regardless of communication)
+        Parameter("R3", "Reward #3", "float", 10)  # Reward for successful jam (arbitrary)
                                                    
                                                    
     ],
