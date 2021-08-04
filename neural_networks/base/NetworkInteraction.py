@@ -137,7 +137,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     """
 
     if show_output:
-        print("Playing games...")
+        pass
+        # print("Playing games...")
 
     if game_params == None:
         p = get_parameters("GAME_PARAMS", default=
@@ -151,7 +152,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         ))
 
     if show_output:
-        print()
+        pass
+        # print()
 
     if policy_maker == None:
         print("Select a policy maker.\n")
@@ -179,7 +181,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         count = get_integer("How many games would you like to play?")
 
     if show_output:
-        print("Please wait while the neural networks are initialized...\n")
+        pass
+        # print("Please wait while the neural networks are initialized...\n")
 
     for zip_player in [policy_maker, transmitter, receiver, adversary]:
         # If player is using a NNET, we need to initialize it w/ parameters

@@ -93,14 +93,26 @@ class SimResult:
         self.params = params
         self.similarity = similarity
 
-def test():
+def jonathan_test_1():
 
-    repeats = 1
+    repeats = 20
     
     all_possible_pairs = []
 
-    usable_adversaries = [adversary_list[1], adversary_list[3]]
-    usable_transmitters = [transmitter_list[3], transmitter_list[4]]
+    #  -- Adversaries
+    #  0 - ExampleAdversary
+    #  1 - GammaAdversary
+    #  3 - PriyaRL_NoPolicy
+    #  4 - PriyaRL_WithPolicy
+
+    usable_adversaries = [adversary_list[i] for i in [0, 1, 3, 4]]
+
+    # -- Transmitters
+    # 3 - IntelligentTransmitter
+    # 4 - PriyaRLTransmitter
+    # 5 - RandomTransmitter
+
+    usable_transmitters = [transmitter_list[i] for i in [3, 4, 5]]
 
     for adversary in usable_adversaries:
         for transmitter in usable_transmitters:
@@ -116,34 +128,48 @@ def test():
 
     results = []
 
-    for index, (adversary, transmitter) in enumerate(all_possible_pairs):
+    filename = "similarity-test.pkl"
 
-        for index2, similarity in enumerate(similarities):
+    try:
 
-            print(f"\n{transmitter.agent.name} VS {adversary.agent.name} " + 
-                  f"(Pairing {index + 1} of {len(all_possible_pairs)}) - " +
-                  f"Trial {index2 + 1} of {len(similarities)}\n")
+        for index, (adversary, transmitter) in enumerate(all_possible_pairs):
 
-            games = play_games(
-                train_model=False,
-                print_each_game=False,
-                nnet_params=None,
-                game_params=params,
-                policy_maker=policy_maker,
-                transmitter=transmitter,
-                receiver=receiver,
-                adversary=adversary,
-                count=repeats,
-                show_output=True,
-                pm_sim_score = similarity
-            )
+            for index2, similarity in enumerate(similarities):
 
-            result = SimResult(games, params, similarity)
+                print(f"\n{transmitter.agent.name} VS {adversary.agent.name} " + 
+                    f"(Pairing {index + 1} of {len(all_possible_pairs)}) - " +
+                    f"Similarity value {index2 + 1} of {len(similarities)}" + 
+                    f" = {similarity}\n")
 
-            results.append(result)
+                games = play_games(
+                    train_model=False,
+                    print_each_game=False,
+                    nnet_params=None,
+                    game_params=params,
+                    policy_maker=policy_maker,
+                    transmitter=transmitter,
+                    receiver=receiver,
+                    adversary=adversary,
+                    count=repeats,
+                    show_output=True,
+                    pm_sim_score = similarity
+                )
+
+                result = SimResult(games, params, similarity)
+
+                results.append(result)
+
+    except:
+        save_results(filename, results)
         
-    with open("similarity_test.pkl", "wb") as file:
+        print("ABORTING TRIALS - FATAL ERROR OCCURED.")
+        raise
+
+    save_results(filename, results)
+
+def save_results(filename, results):
+    with open(filename, "wb") as file:
         pickle.dump(results, file)
 
 if __name__ == "__main__":
-    test()
+    jonathan_test_1()

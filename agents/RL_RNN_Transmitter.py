@@ -91,6 +91,10 @@ class PriyaRLTransmitter(Transmitter):
             # Remove the oldest element
             self.target_output_vectors.pop(0)
 
+    def policy_and_communication(self, game_state):
+        # Communication is necessary, but ignored for scoring
+        return self.policy_predictor_function(game_state), True
+
     def __init__(self, policy_list: 'list[Policy]', net_params: dict) -> None:
         """
         Initialize this adversary and its neural network.
@@ -120,7 +124,6 @@ class PriyaRLTransmitter(Transmitter):
         temp_params = GameParameterSet(-1, num_policies, -1, -1, -1, -1)
         temp_game_state = GameState(temp_params, policy_list)
 
-        # Communication is necessary, but ignored for scoring
-        super().__init__(lambda gs: (self.policy_predictor_function(gs), True), 
+        super().__init__(self.policy_and_communication, 
             self.policy_predictor_function(temp_game_state, 
                 is_initial_run = True))

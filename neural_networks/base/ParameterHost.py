@@ -40,11 +40,11 @@ default_params = {
         Parameter("NUM_LAYERS", "number of layers in RNN", "int", 2),
         Parameter("LEARNING_RATE", "learning rate", "float", 0.001),
         Parameter("LOOKBACK", "number of past timesteps to consider",
-            "int", 20), # CHECK IF NEEDS TO BE 5
+            "int", 5), # CHECK IF NEEDS TO BE 5 OR 20
         Parameter("HIDDEN_DIM", "number of nodes in hidden dimension", 
             "int", 16),
         Parameter("REPETITIONS", "number of times to repeat training", 
-            "int", 20)  # CHECK IF NEEDS TO BE 5
+            "int", 5)  # CHECK IF NEEDS TO BE 5 OR 20
     ]
 }
 
