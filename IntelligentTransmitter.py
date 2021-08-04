@@ -7,7 +7,7 @@ from copy import deepcopy
 from GameElements import Policy, Round, Transmitter, GameState
 from Adversaries import GammaAdversary
 
-DEBUG = True
+DEBUG = False
 
 class IntelligentTransmitter(Transmitter):
 
@@ -64,8 +64,8 @@ class IntelligentTransmitter(Transmitter):
 
                 if DEBUG:
                     print(" " + "--" * time_future + " After choosing " +
-                        f"{policy_choice}, best policy is index " + 
-                        str(np.argmax(next_expected_rewards)))
+                        f"{policy_choice}, rewards are " + 
+                        str(next_expected_rewards))
 
                 expected_reward += self.delta * max(next_expected_rewards)
             
@@ -76,8 +76,11 @@ class IntelligentTransmitter(Transmitter):
     def get_best_policy_index(self, game_state: GameState, 
             time_future: int = 0, last_policy: int = -1) -> int:
 
-        policy_rewards = self.get_expected_rewards(game_state, time_future, 
-            last_policy)
+        actual_game_state = deepcopy(game_state)
+        actual_game_state.t += 1
+
+        policy_rewards = self.get_expected_rewards(actual_game_state, 
+            time_future, last_policy)
 
         max_value = max(policy_rewards)
         max_value_mask = [ 1 if reward == max_value else 0 
@@ -89,11 +92,15 @@ class IntelligentTransmitter(Transmitter):
         policy_id = random.choices(indices, weights=max_value_mask)[0]
 
         if DEBUG:
-            print(f"Choosing policy {policy_id}")
+            print(f"Choosing policy {policy_id} (Expected rewards were " + 
+                f"{policy_rewards})")
 
         return policy_id
 
     def policy_selector_function(self, game_state: GameState) -> int:
+
+        if DEBUG: 
+            print(f" -- ASKED TO CHOOSE A POLICY AFTER TIME {game_state.t} --")
         
         new_policy = self.get_best_policy_index(game_state, 0, self.last_policy)
         policy_changed = (new_policy != self.last_policy)
@@ -108,8 +115,11 @@ class IntelligentTransmitter(Transmitter):
         self.internal_adversary = GammaAdversary()
         self.max_lookahead = 1
         self.delta = 1
-        self.last_policy = self.get_best_policy_index(
-                GameState(game_params, policy_list))
+        # NOTE that we are always asked for a prediction BEFORE the time has 
+        # increased by 1. Hence why at the start, t should be -1.
+        temp_game_state = GameState(game_params, policy_list)
+        temp_game_state.t = -1
+        self.last_policy = self.get_best_policy_index(temp_game_state)
 
         super().__init__(self.policy_selector_function, 
             start_policy = self.last_policy)

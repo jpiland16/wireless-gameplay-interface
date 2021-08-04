@@ -30,8 +30,8 @@ default_params = {
         Parameter("M", "number of available bands", "int", 10),
         Parameter("N", "number of available policies", "int", 16),
         Parameter("T", "length of the game", "int", 200),
-        Parameter("R1", "Reward #1", "float", 7), 
-        Parameter("R2", "Reward #2", "float", 8),  
+        Parameter("R1", "Reward #1", "float", 10), 
+        Parameter("R2", "Reward #2", "float", 4),  
         Parameter("R3", "Reward #3", "float", 1)   
                                                    
                                                    
