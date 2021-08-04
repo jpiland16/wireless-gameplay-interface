@@ -111,6 +111,18 @@ class GameState():
         self.policy_list = policy_list
         self.rounds = []
 
+    def __deepcopy__(self, memo):
+        
+        new = GameState(self.params, self.policy_list)
+
+        new.t = self.t
+        new.rounds = self.rounds[:]
+        new.score_a = self.score_a
+        new.score_b = self.score_b
+
+        return new
+
+
 class Game():
     """
     A group containing a transmitter, receiver, adversary,
@@ -178,7 +190,7 @@ class Game():
                 if communication:
                     # Change the policy and communicate the change
                     self.receiver.communicate(new_policy_id)
-                    self.state.score_a -= self.state.params.R3 * \
+                    self.state.score_a -= 0 * self.state.params.R3 * \
                         math.log2(self.state.params.N) + self.state.params.R2
                     self.communication_record.append(True)
                 else:
@@ -195,7 +207,7 @@ class Game():
                 # QUESTION - would this ever happen?
                 self.communication_record.append(True)
                 self.state.score_a -= self.state.params.R3 * \
-                    math.log2(self.state.params.N)
+                    0 * math.log2(self.state.params.N)
             else:
                 # No policy change, and no communication
                 self.communication_record.append(False)

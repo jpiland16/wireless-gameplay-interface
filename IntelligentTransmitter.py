@@ -1,18 +1,18 @@
 from GameParameters import GameParameterSet
 from math import log2
+import numpy as np
 import random
 from copy import deepcopy
 
 from GameElements import Policy, Round, Transmitter, GameState
 from Adversaries import GammaAdversary
 
+DEBUG = True
+
 class IntelligentTransmitter(Transmitter):
 
     def get_expected_rewards(self, game_state: GameState, 
             time_future: int, last_policy: int) -> list:
-        
-        game_state = deepcopy(game_state)
-        game_state.t += time_future
         
         # Calculate the expected immediate reward
         adversary_policy_max_mask = self.internal_adversary.get_policy_max_mask(
@@ -45,21 +45,29 @@ class IntelligentTransmitter(Transmitter):
                 # Assume always communicate, so only need to check if policy
                 # has changed
                 - int(policy_changed) * (game_state.params.R2 + 
-                    game_state.params.R3 * log2(game_state.params.N))
+                    0 * game_state.params.R3 * log2(game_state.params.N))
             )
 
             if (time_future < self.max_lookahead 
-                and game_state.t + time_future < game_state.params.T):
-                
+                and game_state.t + 1 < game_state.params.T):
+
                 next_game_state = deepcopy(game_state)
+                next_game_state.t += 1
 
                 next_game_state.rounds.append(
                     Round(game_state.policy_list[policy_choice].get_bandwidth(
                         game_state.t), None, None)
                 )
 
-                expected_reward += max(self.get_expected_rewards(game_state, 
-                    time_future + 1, policy_choice))
+                next_expected_rewards = self.get_expected_rewards(
+                    next_game_state, time_future + 1, policy_choice)
+
+                if DEBUG:
+                    print(" " + "--" * time_future + " After choosing " +
+                        f"{policy_choice}, best policy is index " + 
+                        str(np.argmax(next_expected_rewards)))
+
+                expected_reward += self.delta * max(next_expected_rewards)
             
             rewards.append(expected_reward)
 
@@ -80,6 +88,9 @@ class IntelligentTransmitter(Transmitter):
         # don't always choose the one with the lowest index
         policy_id = random.choices(indices, weights=max_value_mask)[0]
 
+        if DEBUG:
+            print(f"Choosing policy {policy_id}")
+
         return policy_id
 
     def policy_selector_function(self, game_state: GameState) -> int:
@@ -96,6 +107,7 @@ class IntelligentTransmitter(Transmitter):
 
         self.internal_adversary = GammaAdversary()
         self.max_lookahead = 1
+        self.delta = 1
         self.last_policy = self.get_best_policy_index(
                 GameState(game_params, policy_list))
 
