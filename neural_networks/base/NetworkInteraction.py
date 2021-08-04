@@ -257,7 +257,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         # Special work for PriyaRLTransmitter
         if (transmitter.agent.name == "PriyaRLTransmitter"):
             transmitter_params = get_parameters("RL_RNN")
-            transmitter_player_init =  lambda: transmitter.player(game_params.N,
+            transmitter_player_init = lambda N: transmitter.player(
+                policy_maker_player.get_policy_list(),
                 transmitter_params)
         # Special work for IntelligentTransmitter
         elif transmitter.agent.name == "IntelligentTransmitter":

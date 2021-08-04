@@ -1,13 +1,11 @@
-from GameElements import Transmitter, GameState
+from GameParameters import GameParameterSet
+from GameElements import Policy, Transmitter, GameState
 from agents.RL_RNN_Adversary import RL_RNN
-
-import torch
-from torch import nn, Tensor
 
 class PriyaRLTransmitter(Transmitter):
 
-    def bandwidth_predictor_function(self, game_state: GameState,
-            is_initial_run) -> int:
+    def policy_predictor_function(self, game_state: GameState,
+            is_initial_run: bool = False) -> int:
 
         if not is_initial_run:
 
@@ -44,13 +42,9 @@ class PriyaRLTransmitter(Transmitter):
     def refresh_neural_net_input(self, game_state: GameState) -> None:
 
         # Create the vector for one timestep
-        vector = [0 for _ in range(game_state.params.N)]
-        
-        last_bandwidth = game_state.rounds[-1].transmission_band
+        vector = [0 for _ in range(2 * game_state.params.N)]
 
-        for index, policy in enumerate(game_state.policy_list):
-            if policy.get_bandwidth(game_state.t - 1) == last_bandwidth:
-                vector[index] = 1
+        vector[ (self.policy_choice_history[-1] * 2) + 1 ] = 1
 
         for i in range(game_state.params.N):
             # TODO check on timing with game_state.t here
@@ -72,15 +66,24 @@ class PriyaRLTransmitter(Transmitter):
 
         target_output_vector = []
 
-        actual_bandwidth = game_state.rounds[-1].transmission_band
+        for index, policy in enumerate(game_state.policy_list):
 
-        for k in range(game_state.params.N):
-            # TODO check on the timing here with game_state.t (- 1?)
-            if game_state.policy_list[k].get_bandwidth(game_state.t - 1) \
-                    == actual_bandwidth:
-                target_output_vector += [1.0]
+            message_would_be_jammed = (policy.get_bandwidth(game_state.t) == 
+                game_state.rounds[-1].adversary_guess)
+            
+            policy_changed = (len(self.policy_choice_history) > 1 and
+                self.policy_choice_history[-2] != index)
+
+            if message_would_be_jammed:
+                if policy_changed:
+                    target_output_vector += [0.0]
+                else:
+                    target_output_vector += [0.3]
             else:
-                target_output_vector += [0.0]
+                if policy_changed:
+                    target_output_vector += [0.7]
+                else:
+                    target_output_vector += [1.0] 
 
         self.target_output_vectors.append(target_output_vector)
 
@@ -88,7 +91,7 @@ class PriyaRLTransmitter(Transmitter):
             # Remove the oldest element
             self.target_output_vectors.pop(0)
 
-    def __init__(self, num_policies: int, net_params: dict) -> None:
+    def __init__(self, policy_list: 'list[Policy]', net_params: dict) -> None:
         """
         Initialize this adversary and its neural network.
         Note: net_params should be a dict containing the following keys:
@@ -98,17 +101,26 @@ class PriyaRLTransmitter(Transmitter):
          - HIDDEN_DIM
          - REPETITIONS
         """
+        num_policies = len(policy_list)
+
         self.policy_choice_history = []
         self.past_input_vectors = []
         self.target_output_vectors = []
         self.lookback = net_params["LOOKBACK"]
 
         self.net = RL_RNN(
-            num_policies = num_policies,
+            input_size = num_policies * 2,
+            output_size = num_policies,
             num_layers = net_params["NUM_LAYERS"],
             hidden_dim = net_params["HIDDEN_DIM"],
             learning_rate = net_params["LEARNING_RATE"],
             repetitions = net_params["REPETITIONS"]
         )            
 
-        super().__init__()
+        temp_params = GameParameterSet(-1, num_policies, -1, -1, -1, -1)
+        temp_game_state = GameState(temp_params, policy_list)
+
+        # Communication is necessary, but ignored for scoring
+        super().__init__(lambda gs: (self.policy_predictor_function(gs), True), 
+            self.policy_predictor_function(temp_game_state, 
+                is_initial_run = True))
