@@ -28,9 +28,14 @@ class IntelligentTransmitter(Transmitter):
 
             adversary_total_options = sum(adversary_policy_max_mask)
 
-            # 1 correct option if this policy has the max value, 0 otherwise
-            adversary_correct_options = \
-                adversary_policy_max_mask[policy_choice]
+            adversary_correct_options = 0
+
+            for index, policy in enumerate(game_state.policy_list):
+                if (adversary_policy_max_mask[index] == 1 
+                        and policy.get_bandwidth(game_state.t) == 
+                        game_state.policy_list[policy_choice].get_bandwidth(
+                            game_state.t)):
+                    adversary_correct_options += 1
 
             probability_adversary_correct = (adversary_correct_options 
                 / adversary_total_options)

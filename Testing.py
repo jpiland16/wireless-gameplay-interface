@@ -88,61 +88,62 @@ def play(policy_maker, transmitter, receiver, adversary, count, params):
     )
 
 class SimResult:
-    def __init__(self, games, params):
+    def __init__(self, games, params, similarity):
         self.games = games
         self.params = params
+        self.similarity = similarity
 
-def main2(adversary, name):
+def test():
 
-    # Number of repeats for each simulation
-    repeats = 2
+    repeats = 1
+    
+    all_possible_pairs = []
 
-    policy_maker = policy_maker_list[1]
-    transmitter = transmitter_list[3]
+    usable_adversaries = [adversary_list[1], adversary_list[3]]
+    usable_transmitters = [transmitter_list[3], transmitter_list[4]]
+
+    for adversary in usable_adversaries:
+        for transmitter in usable_transmitters:
+            all_possible_pairs.append((adversary, transmitter))
+
+    policy_maker = policy_maker_list[2]
     receiver = receiver_list[0]
 
-    # Print info about what we are doing
-    print(f"Running {repeats} sims. ea. for P = {str(policy_maker)}, \n" + 
-        f"T = {str(transmitter)}, R = {str(receiver)}, A = {str(adversary)}\n")
-
     default_params = get_parameters("GAME_PARAMS")
+    params = get_game_params_from_dict(default_params)
 
-    range_bands = range(10, 110, 10)
-    range_policies = range(10, 110, 10)
-    total_count = len(range_bands) * len(range_policies)
+    similarities = [i/10 for i in range(10)]
 
-    results = [ ]
+    results = []
 
-    count = 1
+    for index, (adversary, transmitter) in enumerate(all_possible_pairs):
 
-    for num_bands in range_bands:
+        for index2, similarity in enumerate(similarities):
 
-        for num_policies in range_policies:
+            print(f"\n{transmitter.agent.name} VS {adversary.agent.name} " + 
+                  f"(Pairing {index + 1} of {len(all_possible_pairs)}) - " +
+                  f"Trial {index2 + 1} of {len(similarities)}\n")
 
-            print(f"\nRun {count} of {total_count}...")
-
-            new_params = deepcopy(default_params)
-            new_params["M"] = num_bands
-            new_params["N"] = num_policies
-            new_params["R1"] = log2(num_policies) + 3
-
-            completed_games = play(
+            games = play_games(
+                train_model=False,
+                print_each_game=False,
+                nnet_params=None,
+                game_params=params,
                 policy_maker=policy_maker,
                 transmitter=transmitter,
                 receiver=receiver,
                 adversary=adversary,
                 count=repeats,
-                params=new_params
+                show_output=True,
+                pm_sim_score = similarity
             )
 
-            result = SimResult(completed_games, new_params)
+            result = SimResult(games, params, similarity)
 
             results.append(result)
-
-            count += 1
-
-    pickle.dump(results, open(name, 'wb'))
+        
+    with open("similarity_test.pkl", "wb") as file:
+        pickle.dump(results, file)
 
 if __name__ == "__main__":
-    main2(adversary_list[1], "gamma.pkl")
-    main2(adversary_list[3], "rlrnn.pkl")
+    test()

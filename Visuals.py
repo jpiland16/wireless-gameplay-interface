@@ -4,8 +4,8 @@ from dominate.tags import *
 from GameElements import Game
 from Testing import SimResult
 
-HEADERS = ["Score A", "Score B", "B-Acc.", "Sw. Count",
-                    "T", "M", "N", "R1", "R2", "R3", "link"]
+HEADERS = ["Transmitter", "Adversary", "Score A", "Score B", "B-Acc.", 
+            "Sw. Count", "simil.", "T", "M", "N", "R1", "R2", "R3", "link"]
 
 def convert_game_to_html(game: Game):
 
@@ -115,9 +115,11 @@ def analyze_result(result: SimResult):
 
     return total_analysis, all_analyses
 
-def save_games_page(games_analyses: 'list[Analysis]', games: 'list[Game]',
+def save_games_page(games_analyses: 'list[Analysis]', result: SimResult,
         file_prefix: str, folder: str):
     
+    games = result.games
+
     doc = document('Game List')
     doc.add(link(rel='stylesheet', href='../../gamepagestyle.css'))
 
@@ -131,10 +133,13 @@ def save_games_page(games_analyses: 'list[Analysis]', games: 'list[Game]',
                     tr(
                         [
                             td(d) for d in [
+                                game.transmitter.__class__.__name__,
+                                game.adversary.__class__.__name__,
                                 single_analysis.score_a,
                                 single_analysis.score_b,
                                 single_analysis.accuracy_b,
                                 single_analysis.switch_count,
+                                result.similarity,
                                 game.state.params.T,
                                 game.state.params.M,
                                 game.state.params.N,
@@ -184,16 +189,19 @@ def generate_site(results: 'list[SimResult]', folder_name: str):
 
         _tr.add(
             [td(d) for d in [
+                result.games[0].transmitter.__class__.__name__,
+                result.games[0].adversary.__class__.__name__,
                 meta_analysis.score_a,
                 meta_analysis.score_b,
                 meta_analysis.accuracy_b,
                 meta_analysis.switch_count,
-                round(result.params["T"], 2),
-                round(result.params["M"], 2),
-                round(result.params["N"], 2),
-                round(result.params["R1"], 2),
-                round(result.params["R2"], 2),
-                round(result.params["R3"], 2)
+                result.similarity,
+                round(result.params.T, 2),
+                round(result.params.M, 2),
+                round(result.params.N, 2),
+                round(result.params.R1, 2),
+                round(result.params.R2, 2),
+                round(result.params.R3, 2)
             ]]
         )
 
@@ -201,7 +209,7 @@ def generate_site(results: 'list[SimResult]', folder_name: str):
 
         _tr.add(td(a("view all games", href=f"{this_prefix}.html")))
 
-        save_games_page(games_analyses, result.games, this_prefix,
+        save_games_page(games_analyses, result, this_prefix,
             folder_name)
 
     with open(folder_name + "_summary.html", "w") as file:
