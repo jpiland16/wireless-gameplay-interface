@@ -1,7 +1,7 @@
-from Transmitters import *
-from Receivers import *
-from Adversaries import *
-from PolicyMakers import *
+from agents.Transmitters import *
+from agents.Receivers import *
+from agents.Adversaries import *
+from agents.PolicyMakers import *
 from GameElements import *
 from datetime import datetime
 import os

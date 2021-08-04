@@ -2,7 +2,7 @@
 
 ## How to contribute *(Duke/Data+ Project 13 members only)*
 
- - **To get started making agent that makes decisions according to a mathematical formula,** place the agent's class code in the appropriate file in the root directory, i.e. in one of the following: [Transmitters.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/Transmitters.py) / [Receivers.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/Receivers.py) / [Adversaries.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/Adversaries.py) / [PolicyMakers.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/PolicyMakers.py) (examples are provided to demonstrate the correct syntax)
+ - **To get started making agent that makes decisions according to a mathematical formula,** place the agent's class code in the appropriate file in the root directory, i.e. in one of the following: [Transmitters.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/agents/Transmitters.py) / [Receivers.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/agents/Receivers.py) / [Adversaries.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/agents/Adversaries.py) / [PolicyMakers.py](https://github.com/jpiland16/neural-net-basic-game/blob/master/agents/PolicyMakers.py) (examples are provided to demonstrate the correct syntax)
 
  - **To get started building a neural network,** check out the neural networks [README](https://github.com/jpiland16/neural-net-basic-game/tree/master/neural_networks/base/) or some of my [examples](https://github.com/jpiland16/neural-net-basic-game/tree/master/neural_networks/jonathan).
 

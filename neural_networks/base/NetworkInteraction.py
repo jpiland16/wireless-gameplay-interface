@@ -1,7 +1,7 @@
 import inspect, copy
 from tqdm import tqdm
 
-import Adversaries, Transmitters, Receivers, PolicyMakers
+import agents.Adversaries, agents.Transmitters, agents.Receivers, agents.PolicyMakers
 
 from Util import confirm, get_integer, select_option
 from ShowInfo import get_game_info_string
@@ -37,8 +37,8 @@ class ZipPlayer():
 
 def get_adversaries() -> 'list[ZipPlayer]':
     adversaries = [ZipPlayer(GameAgent("Adversary", a[0]), a[1]) 
-        for a in inspect.getmembers(Adversaries, inspect.isclass) 
-            if a[1].__module__ == "Adversaries" 
+        for a in inspect.getmembers(agents.Adversaries, inspect.isclass) 
+            if a[1].__module__ == "agents.Adversaries" 
             or a[1].__module__ == "RL_RNN_Adversary"]
     for agent in get_available_networks():
         if agent.role == "Adversary":
@@ -49,9 +49,9 @@ def get_adversaries() -> 'list[ZipPlayer]':
 
 def get_transmitters() -> 'list[ZipPlayer]':
     transmitters = [ZipPlayer(GameAgent("Transmitter", t[0]), t[1]) 
-        for t in inspect.getmembers(Transmitters, inspect.isclass) 
-            if t[1].__module__ == "Transmitters"
-            or t[1].__module__ == "IntelligentTransmitter"]
+        for t in inspect.getmembers(agents.Transmitters, inspect.isclass) 
+            if t[1].__module__ == "agents.Transmitters"
+            or t[1].__module__ == "agents.IntelligentTransmitter"]
     for agent in get_available_networks():
         if agent.role == "Transmitter":
             transmitters.append(
@@ -61,8 +61,8 @@ def get_transmitters() -> 'list[ZipPlayer]':
 
 def get_receivers() -> 'list[ZipPlayer]':
     receivers = [ZipPlayer(GameAgent("Receiver", r[0]), r[1]) 
-        for r in inspect.getmembers(Receivers, inspect.isclass) 
-            if r[1].__module__ == "Receivers"]
+        for r in inspect.getmembers(agents.Receivers, inspect.isclass) 
+            if r[1].__module__ == "agents.Receivers"]
     for agent in get_available_networks():
         if agent.role == "Receiver":
             receivers.append(
@@ -72,8 +72,8 @@ def get_receivers() -> 'list[ZipPlayer]':
 
 def get_policy_makers() -> 'list[ZipPlayer]':
     policy_makers = [ZipPlayer(GameAgent("PolicyMaker", p[0]), p[1]) 
-        for p in inspect.getmembers(PolicyMakers, inspect.isclass) 
-            if p[1].__module__ == "PolicyMakers"]
+        for p in inspect.getmembers(agents.PolicyMakers, inspect.isclass) 
+            if p[1].__module__ == "agents.PolicyMakers"]
     for agent in get_available_networks():
         if agent.role == "PolicyMaker":
             policy_makers.append(
@@ -99,9 +99,9 @@ def train_demo():
         get_parameters("TRAINING_SIMPLE_RNN_ADV"), 
         get_game_params_from_dict(get_parameters("GAME_PARAMS")),
         ZipPlayer(policy_maker_agent, 
-            PolicyMakers.RandomDeterministicPolicyMaker), 
-        ZipPlayer(transmitter_agent, Transmitters.ExampleTransmitter),
-        ZipPlayer(receiver_agent, Receivers.ExampleReceiver), 
+            agents.PolicyMakers.RandomDeterministicPolicyMaker), 
+        ZipPlayer(transmitter_agent, agents.Transmitters.ExampleTransmitter),
+        ZipPlayer(receiver_agent, agents.Receivers.ExampleReceiver), 
         ZipPlayer(adversary_agent)
     )
 

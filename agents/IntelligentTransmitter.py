@@ -5,7 +5,7 @@ import random
 from copy import deepcopy
 
 from GameElements import Policy, Round, Transmitter, GameState
-from Adversaries import GammaAdversary
+from agents.Adversaries import GammaAdversary
 
 DEBUG = False
 

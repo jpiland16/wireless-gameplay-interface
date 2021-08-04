@@ -11,7 +11,7 @@ def convert_game_to_html(game: Game):
 
     with document('Game Results') as doc:
 
-        link(rel='stylesheet', href='../../style.css')
+        link(rel='stylesheet', href='../../styles/singlegamestyle.css')
 
         with table().add(tbody()):
 
@@ -121,7 +121,7 @@ def save_games_page(games_analyses: 'list[Analysis]', result: SimResult,
     games = result.games
 
     doc = document('Game List')
-    doc.add(link(rel='stylesheet', href='../../gamepagestyle.css'))
+    doc.add(link(rel='stylesheet', href='../../styles/gamepagestyle.css'))
 
     doc.add(table(
             tbody(
@@ -173,7 +173,7 @@ def save_games_page(games_analyses: 'list[Analysis]', result: SimResult,
 def generate_site(results: 'list[SimResult]', folder_name: str):
 
     doc = document('Results Summary')
-    doc.add(link(rel='stylesheet', href='../../summarystyle.css'))
+    doc.add(link(rel='stylesheet', href='../../styles/summarystyle.css'))
     doc.add(h1("Average results for various parameters"))
 
     _table = doc.add(table())
