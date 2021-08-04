@@ -4,6 +4,7 @@ from ShowInfo import show_game_info, show_string
 from Util import get_integer, confirm
 
 from agents.IntelligentTransmitter import IntelligentTransmitter
+from agents.RL_RNN_Transmitter import PriyaRLTransmitter
 
 class ExampleTransmitter(Transmitter):
 

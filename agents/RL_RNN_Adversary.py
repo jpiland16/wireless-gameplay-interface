@@ -1,21 +1,20 @@
-from GameParameters import GameParameterSet
 from GameElements import Adversary, GameState
 
 import torch
 from torch import nn, Tensor
 
 class RL_RNN(nn.Module):
-    def __init__(self, num_policies: int, num_layers: int, 
+    def __init__(self, input_size: int, output_size: int, num_layers: int, 
             hidden_dim: int, learning_rate: float, repetitions: int):
         """
         Initialize this neural network.
         """
         super().__init__()
 
-        self.input_size = num_policies * 2
+        self.input_size = input_size
         self.num_layers = num_layers
         self.hidden_dim = hidden_dim
-        self.output_size = num_policies
+        self.output_size = output_size
         self.rnn = nn.RNN(self.input_size, self.hidden_dim, 
             self.num_layers, batch_first=True)   
         self.fc = nn.Linear(self.hidden_dim, self.output_size)
@@ -172,7 +171,8 @@ class PriyaRLAdversary(Adversary):
         self.has_policy_knowledge = has_policy_knowledge
 
         self.net = RL_RNN(
-            num_policies = num_policies,
+            input_size = num_policies * 2,
+            output_size = num_policies,
             num_layers = net_params["NUM_LAYERS"],
             hidden_dim = net_params["HIDDEN_DIM"],
             learning_rate = net_params["LEARNING_RATE"],

@@ -39,7 +39,7 @@ def get_adversaries() -> 'list[ZipPlayer]':
     adversaries = [ZipPlayer(GameAgent("Adversary", a[0]), a[1]) 
         for a in inspect.getmembers(agents.Adversaries, inspect.isclass) 
             if a[1].__module__ == "agents.Adversaries" 
-            or a[1].__module__ == "RL_RNN_Adversary"]
+            or a[1].__module__ == "agents.RL_RNN_Adversary"]
     for agent in get_available_networks():
         if agent.role == "Adversary":
             adversaries.append(
@@ -51,7 +51,8 @@ def get_transmitters() -> 'list[ZipPlayer]':
     transmitters = [ZipPlayer(GameAgent("Transmitter", t[0]), t[1]) 
         for t in inspect.getmembers(agents.Transmitters, inspect.isclass) 
             if t[1].__module__ == "agents.Transmitters"
-            or t[1].__module__ == "agents.IntelligentTransmitter"]
+            or t[1].__module__ == "agents.IntelligentTransmitter"
+            or t[1].__module__ == "agents.RL_RNN_Transmitter"]
     for agent in get_available_networks():
         if agent.role == "Transmitter":
             transmitters.append(
@@ -177,15 +178,6 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     elif count < 0:
         count = get_integer("How many games would you like to play?")
 
-    # Special work for PriyaRLAdversary
-    if (adversary.agent.name == "PriyaRL_NoPolicy" or 
-            adversary.agent.name == "PriyaRL_WithPolicy"):
-        adversary_params = get_parameters("RL_RNN")
-        adversary_player_init =  lambda: adversary.player(game_params.N,
-            adversary_params)
-    else:
-        adversary_player_init = adversary.player
-
     if show_output:
         print("Please wait while the neural networks are initialized...\n")
 
@@ -254,15 +246,30 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         else:
             policy_maker_player = policy_maker.player(game_params)
 
+        # Special work for PriyaRLAdversary
+        if (adversary.agent.name == "PriyaRL_NoPolicy" or 
+                adversary.agent.name == "PriyaRL_WithPolicy"):
+            adversary_params = get_parameters("RL_RNN")
+            adversary_player_init =  lambda: adversary.player(game_params.N,
+                adversary_params)
+        else:
+            adversary_player_init = adversary.player
+        # Special work for PriyaRLTransmitter
+        if (transmitter.agent.name == "PriyaRLTransmitter"):
+            transmitter_params = get_parameters("RL_RNN")
+            transmitter_player_init =  lambda: transmitter.player(game_params.N,
+                transmitter_params)
         # Special work for IntelligentTransmitter
-        if transmitter.agent.name == "IntelligentTransmitter":
-            transmitter_player = transmitter.player(game_params,
+        elif transmitter.agent.name == "IntelligentTransmitter":
+            transmitter_player_init = lambda N: transmitter.player(game_params,
                 policy_maker_player.get_policy_list())
         else:
-            transmitter_player = transmitter.player(game_params.N)
+            transmitter_player_init = transmitter.player
+
+        ########## End special work
 
         game = simulate_game(game_params, policy_maker_player, 
-            transmitter_player, receiver.player(), 
+            transmitter_player_init(game_params.N), receiver.player(), 
             adversary_player_init())
         completed_games.append(game)
         if print_each_game:
