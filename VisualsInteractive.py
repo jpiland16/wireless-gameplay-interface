@@ -66,6 +66,7 @@ OUT_COLUMNS = [
 def load_file(filename) -> 'list[SimResult]':
 
     try:
+        print("Loading file...")
         results = pickle.load(open(filename, "rb"))
     except:
         results = []
@@ -73,18 +74,11 @@ def load_file(filename) -> 'list[SimResult]':
     
     return results
 
-def filter_results(results: 'list[SimResult]', filter_choice: Column = None,
-        filter_value: str = None) -> 'list[SimResult]':
+def filter_results(results: 'list[SimResult]', filter_choice: Column,
+        filter_value: str) -> 'list[SimResult]':
     """
     Return only some of the results from the data.
     """
-
-    if filter_choice == None:
-        print("\nWhich parameter should be used to filter the data?\n")
-        filter_choice = select_option(filter_columns + param_columns)
-
-    if filter_value == None:
-        filter_value = input("Enter the desired value of this parameter > ")
 
     filtered_results = []
 
@@ -94,34 +88,47 @@ def filter_results(results: 'list[SimResult]', filter_choice: Column = None,
 
     return filtered_results    
 
-def choose_lines() -> Column:
+def choose_filter(choices: 'list[Column]') -> 'tuple[Column, str]':
+    """
+    Allows the user to choose a parameter and desired value to limit the
+    amount of data graphed.
+    """
+    
+    print("\nWhich parameter should be used to filter the data?\n")
+    filter_choice = select_option(choices)
+
+    filter_value = input("Enter the desired value of this parameter > ")
+
+    return filter_choice, filter_value
+
+def choose_lines(choices: 'list[Column]') -> Column:
     """
     Allow the user to choose which column separates the data into one or more
     lines on the chart.
     """    
     print("\nWhich parameter should be used to separate the graph \n" + 
         "into multiple lines on the chart?\n")
-    line_choice = select_option(filter_columns + param_columns)
+    line_choice = select_option(choices)
 
     return line_choice
 
-def choose_x_axis() -> Column:
+def choose_x_axis(choices: 'list[Column]') -> Column:
     """
     Choose which quantitative input variable will appear on the X-axis.
     """
 
     print("\nWhich parameter should appear on the X-axis?\n")
-    x_choice = select_option(param_columns)
+    x_choice = select_option(choices)
 
     return x_choice
 
-def choose_y_axis() -> Column:
+def choose_y_axis(choices: 'list[Column]') -> Column:
     """
     Choose which quantitative output variable will appear in the Y-axis.
     """
 
     print("\nWhich variable should appear on the Y-axis?\n")
-    y_choice = select_option(out_columns)
+    y_choice = select_option(choices)
 
     return y_choice
 
@@ -149,13 +156,23 @@ def show_count(results: 'list[SimResult]'):
 def save_graph(data: 'dict[str, dict[str, list]]', use_error_bars: bool,
         x_label: str, y_label: str, title: str, filename: str):
 
+    fmt = "s-"
+    markersize = 5
+
     for label in data:
         # Create a single line
         if use_error_bars:
-            plt.errorbar(data[label]["x"], data[label]["y"], 
-                data[label]["y_err"], label=label)
+            (_, caps, _) = plt.errorbar(data[label]["x"], data[label]["y"], 
+                data[label]["y_err"], label=label, capsize=3, fmt=fmt,
+                    markersize=markersize)
+
+            # NOTE: See https://stackoverflow.com/questions/35915431/top-and-bottom-line-on-errorbar-with-python-and-seaborn
+            for cap in caps:
+                cap.set_markeredgewidth(1)
+
         else:
-            plt.plot(data[label]["x"], data[label]["y"], label=label)
+            plt.plot(data[label]["x"], data[label]["y"], label=label, fmt=fmt,
+                markersize=markersize)
 
     plt.title(title)
     plt.legend()
@@ -216,12 +233,27 @@ def get_data(results: 'list[SimResult]', filter: 'tuple[Column, str]',
 
     return data  
 
-def main():
-    global filter_columns, param_columns, out_columns
+def get_all_user_choices():
 
-    print("Welcome to the interactive graph creator.\n"
-        "Please add your results using the prompt below.\n")
+    if confirm("Do you want to filter the data first?"):
+        filter_tuple = choose_filter(FILTER_COLUMNS + PARAM_COLUMNS)
+    else:
+        filter_tuple = None
 
+    line_choice = choose_lines(FILTER_COLUMNS + PARAM_COLUMNS)
+    x_choice = choose_x_axis(PARAM_COLUMNS)
+    y_choice = choose_y_axis(OUT_COLUMNS)
+    use_error_bars = confirm("\nDo you want to use error bars?")
+
+    if use_error_bars:
+        confidence_percent = get_integer(
+            "Enter the confidence percent (ex: 95)", 0, 99)
+
+    return filter_tuple, line_choice, x_choice, y_choice, use_error_bars, \
+            confidence_percent
+
+def get_results():
+    
     results = []
     
     while True:
@@ -236,36 +268,29 @@ def main():
         results += load_file(input_filename)
         show_count(results)
 
+    return results
+
+def main():
+
+    print("Welcome to the interactive graph creator.\n"
+        "Please add your results using the prompt below.\n")
+
+    results = get_results()
+
     while True: 
         # Generate as many graphs as you like
 
-        filter_columns = FILTER_COLUMNS[:]
-        param_columns = PARAM_COLUMNS[:]
-        out_columns = OUT_COLUMNS[:]
-
         print()
 
-        if confirm("Do you want to filter the data first?"):
-            filtered_results = filter_results(results)
-            show_count(filtered_results)
-        else:
-            filtered_results = results
-
-        line_choice = choose_lines()
-        x_choice = choose_x_axis()
-        y_choice = choose_y_axis()
-        use_error_bars = confirm("\nDo you want to use error bars?")
-
-        if use_error_bars:
-            confidence_percent = get_integer(
-                "Enter the confidence percent (ex: 95)", 0, 99)
+        filter_tuple, line_choice, x_choice, y_choice, use_error_bars, \
+            confidence_percent = get_all_user_choices()
 
         title = input("\nEnter the title for the graph > ")
         filename = input("Enter the file name to save graph > ")
 
         data = get_data(
-            results = filtered_results,
-            filter = None, # because we already performed the filter
+            results = results,
+            filter = filter_tuple, # because we already performed the filter
             line_choice = line_choice,
             x_choice = x_choice,
             y_choice = y_choice,
@@ -279,6 +304,30 @@ def main():
         if not confirm("Do you want to make another graph with these results?"):
             break
 
+def iget_data(results = None):
+    """
+    Interactively GET the data (returned as a dict)
+    """
+
+    if results == None:
+        print("The 'iget_data' function requires data to have already been \n" + 
+            "loaded from a pickle file. Try 'results = get_results()' first, \n"
+            "then run 'iget_data(results)'.")
+        return
+
+    filter_tuple, line_choice, x_choice, y_choice, use_error_bars, \
+            confidence_percent = get_all_user_choices()
+
+    return get_data(
+            results = results,
+            filter = filter_tuple, # because we already performed the filter
+            line_choice = line_choice,
+            x_choice = x_choice,
+            y_choice = y_choice,
+            use_error_bars = use_error_bars,
+            confidence_percent = confidence_percent
+        )
+
 def diy_fast():
 
     x_choice = PARAM_COLUMNS[6] # Similarity
@@ -291,13 +340,13 @@ def diy_fast():
         x_choice = x_choice,
         y_choice = y_choice,
         use_error_bars = True,
-        confidence_percent = 70
+        confidence_percent = 50
     )
 
     save_graph(
         data, True, x_choice.shortname, y_choice.shortname, 
-        title = "IntelligentTransmitter vs Others, 70% confidence",
-        filename = "img/test11.png"
+        title = "IntelligentTransmitter vs Others, 50% confidence",
+        filename = "img/test16.png"
     )
 
 if __name__ == "__main__":
@@ -306,3 +355,9 @@ if __name__ == "__main__":
         diy_fast()
     except KeyboardInterrupt:
         print()
+else:
+    print("Welcome to the interactive graph creator! This script is \n" +
+        "currently running as part of an interactive shell. \n" + 
+        "To get started, try the following commands: \n\n"+
+        " - results = get_results() \n"
+        " - iget_data(results) \n")
