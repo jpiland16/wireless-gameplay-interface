@@ -351,8 +351,8 @@ def diy_fast():
 
 if __name__ == "__main__":
     try:
-        # main()
-        diy_fast()
+        main()
+        # diy_fast()
     except KeyboardInterrupt:
         print()
 else:
