@@ -15,6 +15,8 @@ from neural_networks.base.NeuralNetworks import GameAgent, \
 from neural_networks.base.ParameterHost import get_parameters
 from neural_networks.jonathan.SimpleRNNs import SimpleRNN_Adversary
 
+import agents.DQLTransmitter
+
 class ZipPlayer():
     """
     Wrapper class to keep up with the players of the game, their "names",
@@ -53,6 +55,9 @@ def get_transmitters() -> 'list[ZipPlayer]':
             if t[1].__module__ == "agents.Transmitters"
             or t[1].__module__ == "agents.IntelligentTransmitter"
             or t[1].__module__ == "agents.RL_RNN_Transmitter"]
+    # Add the DQN specially
+    transmitters.append(ZipPlayer(GameAgent("Transmitter", "DQLTransmitter"),
+        agents.DQLTransmitter.prepare_for_gameplay))
     for agent in get_available_networks():
         if agent.role == "Transmitter":
             transmitters.append(
@@ -257,6 +262,8 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
                 adversary_params)
         else:
             adversary_player_init = adversary.player
+        adversary_player = adversary_player_init()
+
         # Special work for PriyaRLTransmitter
         if (transmitter.agent.name == "PriyaRLTransmitter"):
             transmitter_params = get_parameters("RL_RNN")
@@ -267,6 +274,10 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         elif transmitter.agent.name == "IntelligentTransmitter":
             transmitter_player_init = lambda N: transmitter.player(game_params,
                 policy_maker_player.get_policy_list())
+        # Special work for DQLTransmitter
+        elif transmitter.agent.name == "DQLTransmitter":
+            transmitter_player_init = lambda N: transmitter.player(game_params,
+                policy_maker_player, adversary_player)
         else:
             transmitter_player_init = transmitter.player
 
@@ -274,7 +285,7 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
 
         game = simulate_game(game_params, policy_maker_player, 
             transmitter_player_init(game_params.N), receiver.player(), 
-            adversary_player_init())
+            adversary_player)
         completed_games.append(game)
         if print_each_game:
             print(get_game_info_string(game.state))
