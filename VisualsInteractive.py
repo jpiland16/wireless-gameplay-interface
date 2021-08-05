@@ -146,10 +146,27 @@ def show_count(results: 'list[SimResult]'):
     result_count, game_count = count(results)
     print(f"Current status: {result_count} results, {game_count} games")
 
-def save_graph(results: 'list[SimResult]', filter: 'tuple[Column, str]', 
+def save_graph(data: 'dict[str, dict[str, list]]', use_error_bars: bool,
+        x_label: str, y_label: str, title: str, filename: str):
+
+    for label in data:
+        # Create a single line
+        if use_error_bars:
+            plt.errorbar(data[label]["x"], data[label]["y"], 
+                data[label]["y_err"], label=label)
+        else:
+            plt.plot(data[label]["x"], data[label]["y"], label=label)
+
+    plt.title(title)
+    plt.legend()
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.savefig(filename, dpi=500)
+    plt.clf()
+
+def get_data(results: 'list[SimResult]', filter: 'tuple[Column, str]', 
         line_choice: Column, x_choice: Column, y_choice: Column, 
-        use_error_bars: bool, confidence_percent: int, title: str, 
-        filename: str):
+        use_error_bars: bool, confidence_percent: int):
 
     z_score = st.norm.ppf(0.5 + confidence_percent / 200)
 
@@ -160,6 +177,8 @@ def save_graph(results: 'list[SimResult]', filter: 'tuple[Column, str]',
         filtered_results = results
     
     groups = group_by_line(filtered_results, line_choice)
+
+    data = { }
 
     for label in groups:
         # Create a single line
@@ -187,16 +206,15 @@ def save_graph(results: 'list[SimResult]', filter: 'tuple[Column, str]',
             if use_error_bars:
                 y_err.append(stdev(points) * z_score)
 
-        if use_error_bars:
-            plt.errorbar(x, y, y_err, label=label)
-        else:
-            plt.plot(x, y, label=label)
+        data[label] = {
+            "x": x,
+            "y": y,
+        }
 
-    plt.title(title)
-    plt.legend()
-    plt.xlabel(x_choice.shortname)
-    plt.ylabel(y_choice.shortname)
-    plt.savefig(filename, dpi=500)
+        if use_error_bars:
+            data[label]["y_err"] = y_err
+
+    return data  
 
 def main():
     global filter_columns, param_columns, out_columns
@@ -245,39 +263,46 @@ def main():
         title = input("\nEnter the title for the graph > ")
         filename = input("Enter the file name to save graph > ")
 
-        save_graph(
+        data = get_data(
             results = filtered_results,
             filter = None, # because we already performed the filter
             line_choice = line_choice,
             x_choice = x_choice,
             y_choice = y_choice,
             use_error_bars = use_error_bars,
-            confidence_percent = confidence_percent,
-            title = title,
-            filename = filename
+            confidence_percent = confidence_percent
         )
 
-        plt.clf()
+        save_graph(data, use_error_bars, x_choice.shortname, 
+            y_choice.shortname, title, filename)
 
         if not confirm("Do you want to make another graph with these results?"):
             break
 
 def diy_fast():
-    save_graph(
+
+    x_choice = PARAM_COLUMNS[6] # Similarity
+    y_choice = OUT_COLUMNS[2] # Adversary accuracy
+
+    data = get_data(
         results = pickle.load(open("similarity-test.pkl", "rb")),
         filter = (FILTER_COLUMNS[1], "IntelligentTransmitter"), 
         line_choice = FILTER_COLUMNS[3], # Adversary (different agents)
-        x_choice = PARAM_COLUMNS[6], # Similarity
-        y_choice = OUT_COLUMNS[2], # Adversary accuracy
+        x_choice = x_choice,
+        y_choice = y_choice,
         use_error_bars = True,
-        confidence_percent = 70,
+        confidence_percent = 70
+    )
+
+    save_graph(
+        data, True, x_choice.shortname, y_choice.shortname, 
         title = "IntelligentTransmitter vs Others, 70% confidence",
-        filename = "img/test9.png"
+        filename = "img/test11.png"
     )
 
 if __name__ == "__main__":
     try:
-        main()
-        # diy_fast()
+        # main()
+        diy_fast()
     except KeyboardInterrupt:
         print()
