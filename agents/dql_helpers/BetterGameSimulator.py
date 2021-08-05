@@ -29,15 +29,7 @@ class BetterGameSimulator:
         gameReward = 0
 
         # Run the game
-
-        state = []
-        for item in self.state:
-            if type(self.state[item]) is list:
-                for elm in self.state[item]:
-                    state.append(elm)
-            else:
-                state.append(self.state[item])
-        self.nnInput = state
+        self.nnInput = self.get_current_state_as_list()
 
         done = False
         while not done:
@@ -45,9 +37,9 @@ class BetterGameSimulator:
             action, reward, next_state, done = item
             if done:
                 for i in range(5):
-                    self.transmitter.buffer.push(state, action, 0, next_state, 0)
+                    self.transmitter.buffer.push(self.nnInput, action, 0, next_state, 0)
             else:
-                self.transmitter.buffer.push(state, action, reward, next_state, 1)
+                self.transmitter.buffer.push(self.nnInput, action, reward, next_state, 1)
 
 
             state = next_state
@@ -56,6 +48,18 @@ class BetterGameSimulator:
 
         return gameReward, self.switches
 
+    def get_current_state_as_list(self):
+
+        state_list = [ ]
+        
+        for value in self.state.values():
+            if type(value) is list:
+                for element in value:
+                    state_list.append(element)
+            else:
+                state_list.append(value)
+
+        return state_list
 
     def advance_time(self) -> 'tuple[int, int, list, bool]':
         """
@@ -64,7 +68,6 @@ class BetterGameSimulator:
         Returns action, reward, nextState, and whether the game is done.
         """
 
-        reward = 0
         t = self.t
         # Select policy --------------------------------
         action = self.transmitter.get_policy(self.nnInput, training=self.training)
@@ -75,6 +78,16 @@ class BetterGameSimulator:
         receiver_guess = transmission_band
         adversary_guess = self.adversary.predict_policy(self.GameState)
 
+        return self.continue_time(action, transmission_band, receiver_guess, 
+            adversary_guess)
+
+    def continue_time(self, action, transmission_band, 
+            receiver_guess, adversary_guess):
+        """
+        A continuation of the advance_time method, but can also be used when 
+        playing games run by a different simulator.
+        """
+        reward = 0
 
         self.GameState.rounds.append(Round(transmission_band, receiver_guess, adversary_guess))
 
@@ -91,13 +104,7 @@ class BetterGameSimulator:
         # Advance the time ----------------------------------------------------
         self.updateState(action)
 
-        nextState = []
-        for item in self.state:
-            if type(self.state[item]) is list:
-                for elm in self.state[item]:
-                    nextState.append(elm)
-            else:
-                nextState.append(self.state[item])
+        nextState = self.get_current_state_as_list()
 
         if self.t >= self.params.T:
             return action, reward, nextState, True
@@ -111,16 +118,15 @@ class BetterGameSimulator:
 
         t = self.t
 
-
         self.state["1_hot_last_policy"] = [0 for _ in range(self.params.N)]
-        self.state["1_hot_last_policy"][action]=1
+        self.state["1_hot_last_policy"][action] = 1
         bands= self.internalAdversary.bandwidth_prediction_vals(self.policy_list, self.GameState.rounds, self.params.M, t)
 
         for i, policy in enumerate(self.policy_list):
             self.state["internal_predictions"][i] = bands[policy.get_bandwidth(t)]
-        self.state["t%"] = t/self.params.T
+        self.state["t%"] = t / self.params.T
         self.last_policy = action
 
-        t = t+1
+        t = t + 1
         self.GameState.t =t
         self.t = t

@@ -277,9 +277,15 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
         # Special work for DQLTransmitter
         elif transmitter.agent.name == "DQLTransmitter":
             transmitter_player_init = lambda N: transmitter.player(game_params,
-                policy_maker_player, adversary_player)
+                policy_maker_player, adversary_player, get_parameters("DQN"))
         else:
             transmitter_player_init = transmitter.player
+
+        # Reset Priya's RNN, in case it trained while playing against the DQN
+        if (adversary.agent.name == "PriyaRL_NoPolicy" or 
+                adversary.agent.name == "PriyaRL_WithPolicy" and 
+                transmitter.agent.name == "DQLTransmitter"):
+            adversary_player = adversary_player_init()
 
         ########## End special work
 

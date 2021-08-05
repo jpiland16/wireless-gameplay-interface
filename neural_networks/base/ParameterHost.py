@@ -39,12 +39,15 @@ default_params = {
     "RL_RNN": [
         Parameter("NUM_LAYERS", "number of layers in RNN", "int", 2),
         Parameter("LEARNING_RATE", "learning rate", "float", 0.001),
-        Parameter("LOOKBACK", "number of past timesteps to consider",
-            "int", 5), # CHECK IF NEEDS TO BE 5 OR 20
-        Parameter("HIDDEN_DIM", "number of nodes in hidden dimension", 
-            "int", 16),
-        Parameter("REPETITIONS", "number of times to repeat training", 
-            "int", 5)  # CHECK IF NEEDS TO BE 5 OR 20
+        Parameter("LOOKBACK", "# of past timesteps to consider", "int", 5), # CHECK IF NEEDS TO BE 5 OR 20
+        Parameter("HIDDEN_DIM", "# of nodes in hidden dimension", "int", 16),
+        Parameter("REPETITIONS", "# of times to repeat training",  "int", 5)  # CHECK IF NEEDS TO BE 5 OR 20
+    ],
+    "DQN": [
+        Parameter("NUM_EPISODES", "number of training episodes", "int", 150),
+        Parameter("UPDATES_PER_EPISODE", "#times DQN updated/ep", "int", 50),
+        Parameter("MIN_GAMES_PER_EPISODE", "minimum #games in ep", "int", 3),
+        Parameter("NUM_SIMULATED_GAMES", "number of simulated games", "int", 10)
     ]
 }
 
