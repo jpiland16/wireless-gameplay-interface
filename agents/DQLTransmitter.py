@@ -114,17 +114,19 @@ class DQLTransmitterHelper():
 
         self.transmitter = transmitter
 
-        game_state = GameState(params, policy_maker.get_policy_list())
+        self.game_state = GameState(params, policy_maker.get_policy_list())
 
-        self.internal_simulation = BetterGameSimulator(game_state, None, None, 
+        self.internal_simulation = BetterGameSimulator(self.game_state, None, None, 
             None, internal_adversary, False)
+
+        self.internal_adversary = internal_adversary
 
         self.nn_input = self.internal_simulation.get_current_state_as_list()
 
         self.start_policy = 0
         self.last_action = self.start_policy
 
-    def get_policy(self, game_state: GameState):
+    def get_policy(self, game_state):
 
         previous = game_state.rounds[-1]
         
@@ -138,3 +140,11 @@ class DQLTransmitterHelper():
 
         # Always communicate (we are not penalized for this though)
         return next_action, True
+
+    def reset_state(self):
+        # self.game_state is linked with BetterGameSimulator
+        # but independent of the parameter in get_policy
+        self.game_state.t = 0
+        self.game_state.rounds = []
+        self.internal_simulation = BetterGameSimulator(self.game_state, None, 
+            None, None, self.internal_adversary, False)

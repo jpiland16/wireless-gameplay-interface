@@ -16,7 +16,7 @@ class DQNAgent:
 
         self.num_policies = NumActions
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         self.model = DQN(NumObs, NumActions).to(self.device)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(),learning_rate)

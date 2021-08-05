@@ -247,7 +247,7 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
     if show_output:
         iter = tqdm(iter)
 
-    for _ in iter:
+    for i in iter:
 
         if policy_maker.agent.name == "SimilarPolicyMaker":
             policy_maker_player = policy_maker.player(game_params, pm_sim_score)
@@ -287,10 +287,16 @@ def play_games(train_model: bool=False, print_each_game: bool=False,
                 transmitter.agent.name == "DQLTransmitter"):
             adversary_player = adversary_player_init()
 
+        if transmitter.agent.name != "DQLTransmitter" or i == 0:
+            # Only train (re-initialize) DQL on the first round
+            transmitter_player = transmitter_player_init(game_params.N)
+        elif transmitter.agent.name == "DQLTransmitter":
+            transmitter_player.reset_state()
+
         ########## End special work
 
         game = simulate_game(game_params, policy_maker_player, 
-            transmitter_player_init(game_params.N), receiver.player(), 
+            transmitter_player, receiver.player(), 
             adversary_player)
         completed_games.append(game)
         if print_each_game:
