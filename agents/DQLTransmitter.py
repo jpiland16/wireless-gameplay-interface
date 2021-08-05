@@ -146,5 +146,6 @@ class DQLTransmitterHelper():
         # but independent of the parameter in get_policy
         self.game_state.t = 0
         self.game_state.rounds = []
+        self.game_state.policy_choice_history = [0]
         self.internal_simulation = BetterGameSimulator(self.game_state, None, 
             None, None, self.internal_adversary, False)

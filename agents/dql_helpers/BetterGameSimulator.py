@@ -12,6 +12,8 @@ class BetterGameSimulator:
         self.adversary = adversary
         self.internalAdversary = internalAdversary
         self.training = training
+        
+        self.GameState.policy_choice_history = [0]
 
         "Size of state is 2N+1"
         self.state = {
@@ -105,6 +107,8 @@ class BetterGameSimulator:
         self.updateState(action)
 
         nextState = self.get_current_state_as_list()
+
+        self.GameState.policy_choice_history.append(action)
 
         if self.t >= self.params.T:
             return action, reward, nextState, True
