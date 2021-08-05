@@ -248,6 +248,8 @@ def get_all_user_choices():
     if use_error_bars:
         confidence_percent = get_integer(
             "Enter the confidence percent (ex: 95)", 0, 99)
+    else:
+        confidence_percent = None
 
     return filter_tuple, line_choice, x_choice, y_choice, use_error_bars, \
             confidence_percent
@@ -334,8 +336,8 @@ def diy_fast():
     y_choice = OUT_COLUMNS[2] # Adversary accuracy
 
     data = get_data(
-        results = pickle.load(open("similarity-test.pkl", "rb")),
-        filter = (FILTER_COLUMNS[1], "IntelligentTransmitter"), 
+        filter = None,
+        results = pickle.load(open("similarity-test-3-dql-only-round2.pkl", "rb")),
         line_choice = FILTER_COLUMNS[3], # Adversary (different agents)
         x_choice = x_choice,
         y_choice = y_choice,
@@ -345,8 +347,8 @@ def diy_fast():
 
     save_graph(
         data, True, x_choice.shortname, y_choice.shortname, 
-        title = "IntelligentTransmitter vs Others, 50% confidence",
-        filename = "img/test16.png"
+        title = "DQL vs ExampleAdversary, 50% confidence",
+        filename = "img/test18.png"
     )
 
 if __name__ == "__main__":
