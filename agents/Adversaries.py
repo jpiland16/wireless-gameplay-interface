@@ -10,7 +10,10 @@ class ExampleAdversary(Adversary):
 
     def bandwidth_predictor_function(self, game_state: GameState) -> int:
         # Guess a random band (0 to M-1)
-        return random.randint(0, game_state.params.M - 1)
+        # return random.randint(0, game_state.params.M - 1)
+
+        # Guess a random policy (0 to N - 1)
+        return random.choice(game_state.policy_list).get_bandwidth(game_state.t)
 
     def __init__(self) -> None:
         super(ExampleAdversary, self).__init__(
