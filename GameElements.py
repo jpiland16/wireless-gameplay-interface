@@ -194,8 +194,9 @@ class Game():
                 if communication:
                     # Change the policy and communicate the change
                     self.receiver.communicate(new_policy_id)
-                    self.state.score_a -= 0 * self.state.params.R3 * \
-                        math.log2(self.state.params.N) + self.state.params.R2
+                    if new_policy_id != self.current_policy_id:
+                        self.state.score_a -= 0 * self.state.params.R3 * \
+                            math.log2(self.state.params.N) + self.state.params.R2
                     self.communication_record.append(True)
                 else:
                     self.communication_record.append(False)
