@@ -83,7 +83,7 @@ class Analysis:
 def analyze_game(game: Game):
 
     analysis = Analysis(
-        round(game.state.score_a, 2), 
+        0, # Recalculate score A
         round(game.state.score_b, 2), 
         round(100 * (game.state.score_b / game.state.params.R3) 
             / game.state.params.T, 2)
@@ -94,7 +94,12 @@ def analyze_game(game: Game):
     for policy in game.policy_record[1:]:
         if policy != last_policy:
             analysis.switch_count += 1
+            analysis.score_a -= game.state.params.R2
             last_policy = policy
+
+    for _round in game.state.rounds:
+        if _round.transmission_band != _round.adversary_guess:
+            analysis.score_a += game.state.params.R1
 
     return analysis
 
